@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WKCP — Training Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+
+:root {
+  --bg: #0a0b0d;
+  --surface: #13151a;
+  --surface2: #1a1d24;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #eeeef0;
+  --muted: #5a6072;
+  --muted2: #8892a4;
+  --accent: #4f7cff;
+  --accent2: #7c3aed;
+  --green: #10b981;
+  --pink: #f472b6;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── LOGIN SCREEN ─── */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.login-tagline {
+  font-size: 13px;
+  color: var(--muted2);
+  margin-bottom: 2.5rem;
+  font-family: 'DM Mono', monospace;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  color: var(--muted2);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+}
+
+.form-input::placeholder { color: var(--muted); }
+
+.sport-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.sport-btn {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--muted2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.sport-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(79,124,255,0.08);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover { opacity: 0.85; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error-msg {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #f87171;
+  font-size: 13px;
+  margin-top: 1rem;
+  display: none;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1.5rem 0;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ─── LOADING SCREEN ─── */
+#loading-screen {
+  min-height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--muted2);
+}
+
+/* ─── DASHBOARD ─── */
+#dashboard-screen { display: none; }
+
+.topbar {
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.topbar-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--text);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-sport {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+}
+
+.logout-btn {
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover { color: var(--text); border-color: var(--border2); }
+
+.main { padding: 1.5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.section-label:first-child { margin-top: 0; }
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.metric-card {
+  background: var(--surface);
+  padding: 1.1rem 1.25rem;
+}
+
+.metric-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 5px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.metric-unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted2);
+  margin-left: 2px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.chart-sub {
+  font-size: 12px;
+  color: var(--muted2);
+  margin-bottom: 1rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+  color: var(--muted2);
+}
+
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+.cw { position: relative; width: 100%; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.zone-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.zone-label {
+  width: 100px;
+  flex-shrink: 0;
+  color: var(--muted2);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.zone-track {
+  flex: 1;
+  height: 18px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.zone-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 7px;
+  font-size: 10px;
+  font-weight: 500;
+  font-family: 'DM Mono', monospace;
+  color: rgba(0,0,0,0.75);
+}
+
+.zone-count {
+  width: 50px;
+  text-align: right;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+}
+td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+}
+
+.footer {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+@media (max-width: 600px) {
+  .main, .topbar { padding: 1rem; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .metric-value { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">WKCP</div>
+    <div class="login-tagline">// training dashboard</div>
+
+    <div class="form-group">
+      <label class="form-label">App-Passwort</label>
+      <input type="password" class="form-input" id="app-password" placeholder="Passwort eingeben">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="form-group">
+      <label class="form-label">Garmin E-Mail</label>
+      <input type="email" class="form-input" id="garmin-email" placeholder="name@email.de">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Garmin Passwort</label>
+      <input type="password" class="form-input" id="garmin-password" placeholder="Garmin Passwort">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Sportart</label>
+      <div class="sport-select">
+        <button class="sport-btn active" id="btn-cycling" onclick="selectSport('cycling')">Rennrad</button>
+        <button class="sport-btn" id="btn-running" onclick="selectSport('running')">Laufen</button>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="startLoad()">Dashboard laden</button>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <div class="divider"></div>
+    <div class="note">Deine Daten werden nicht gespeichert</div>
+  </div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Verbinde mit Garmin...</div>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="dashboard-screen">
+  <div class="topbar">
+    <div class="topbar-logo">WKCP</div>
+    <div class="topbar-right">
+      <div class="topbar-sport" id="sport-badge">Rennrad</div>
+      <button class="logout-btn" onclick="logout()">Abmelden</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="section-label">Gesamtübersicht</div>
+    <div class="metrics-grid" id="metrics-grid"></div>
+
+    <div class="section-label">Entwicklung pro Monat</div>
+    <div class="chart-card">
+      <div class="chart-title">Distanz und Leistung</div>
+      <div class="chart-sub" id="chart-sub-1">Letzte 12 Monate</div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>Distanz km</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Ø Watt / Pace</div>
+      </div>
+      <div class="cw" style="height:220px">
+        <canvas id="c_monat" role="img" aria-label="Monatliche Distanz und Leistung">Monatsdaten</canvas>
+      </div>
+    </div>
+
+    <div class="section-label">Herzfrequenzzonen</div>
+    <div class="chart-card">
+      <div class="chart-title">Zonenverteilung</div>
+      <div class="chart-sub">Basierend auf allen Einheiten mit HF-Daten</div>
+      <div id="zone-bars" style="margin-top:1rem"></div>
+    </div>
+
+    <div class="section-label">Trainingsstruktur</div>
+    <div class="grid-2">
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="chart-title">Verteilung nach Dauer</div>
+        <div class="chart-sub">Anteil der Einheiten</div>
+        <div class="cw" style="height:200px">
+          <canvas id="c_dauer" role="img" aria-label="Trainingsverteilung nach Dauer">Dauer Verteilung</canvas>
+        </div>
+      </div>
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="chart-title">Leistungstrend</div>
+        <div class="chart-sub">Ø Watt/Pace pro Monat</div>
+        <div class="cw" style="height:200px">
+          <canvas id="c_trend" role="img" aria-label="Leistungstrend">Leistungstrend</canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Top Aktivitäten</div>
+    <div class="chart-card">
+      <div class="chart-title">Die 10 längsten Ausfahrten</div>
+      <div class="chart-sub">Sortiert nach Distanz</div>
+      <table style="margin-top:0.75rem">
+        <thead>
+          <tr>
+            <th>#</th><th>Datum</th><th>Name</th><th>Distanz</th><th>Dauer</th><th>Ø W</th><th>Ø HF</th>
+          </tr>
+        </thead>
+        <tbody id="top-table"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="footer">WKCP · Training Dashboard · Powered by Garmin Connect</div>
+</div>
+
+<script>
+const BACKEND = 'https://web-production-9e162.up.railway.app';
+let selectedSport = 'cycling';
+let charts = {};
+
+function selectSport(sport) {
+  selectedSport = sport;
+  document.getElementById('btn-cycling').classList.toggle('active', sport === 'cycling');
+  document.getElementById('btn-running').classList.toggle('active', sport === 'running');
+}
+
+function show(id) {
+  ['login-screen','loading-screen','dashboard-screen'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = s === id ? (s === 'loading-screen' ? 'flex' : 'block') : 'none';
+  });
+}
+
+function logout() {
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  show('login-screen');
+}
+
+async function startLoad() {
+  const appPw = document.getElementById('app-password').value.trim();
+  const email = document.getElementById('garmin-email').value.trim();
+  const pw = document.getElementById('garmin-password').value.trim();
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+
+  if (!appPw || !email || !pw) {
+    errEl.textContent = 'Bitte alle Felder ausfüllen.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  show('loading-screen');
+  const texts = ['Verbinde mit Garmin...','Lade Aktivitäten...','Berechne Statistiken...','Baue Dashboard...'];
+  let i = 0;
+  const interval = setInterval(() => {
+    document.getElementById('loading-text').textContent = texts[Math.min(i++, texts.length - 1)];
+  }, 2000);
+
+  try {
+    const res = await fetch(`${BACKEND}/api/data`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ app_password: appPw, email, password: pw, sport: selectedSport })
+    });
+    const data = await res.json();
+    clearInterval(interval);
+
+    if (!res.ok) {
+      show('login-screen');
+      errEl.textContent = data.error || 'Fehler beim Laden.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    buildDashboard(data.activities, selectedSport);
+    show('dashboard-screen');
+
+  } catch(e) {
+    clearInterval(interval);
+    show('login-screen');
+    errEl.textContent = 'Server nicht erreichbar. Bitte versuche es später.';
+    errEl.style.display = 'block';
+  }
+}
+
+function buildDashboard(acts, sport) {
+  const valid = acts.filter(a => a.dauer_min > 5 && a.distanz_km > 0);
+  valid.sort((a,b) => a.datum.localeCompare(b.datum));
+
+  document.getElementById('sport-badge').textContent = sport === 'cycling' ? 'Rennrad' : 'Laufen';
+
+  const totalKm = valid.reduce((s,a) => s + a.distanz_km, 0);
+  const totalH = valid.reduce((s,a) => s + a.dauer_min, 0) / 60;
+  const totalKcal = valid.reduce((s,a) => s + a.kalorien, 0);
+  const avgSpeed = valid.filter(a=>a.avg_speed_kmh>0).reduce((s,a)=>s+a.avg_speed_kmh,0) / valid.filter(a=>a.avg_speed_kmh>0).length;
+  const avgW = valid.filter(a=>a.avg_power_w>0).reduce((s,a)=>s+a.avg_power_w,0) / (valid.filter(a=>a.avg_power_w>0).length || 1);
+  const avgHR = valid.filter(a=>a.avg_hr>0).reduce((s,a)=>s+a.avg_hr,0) / (valid.filter(a=>a.avg_hr>0).length || 1);
+  const maxDist = Math.max(...valid.map(a=>a.distanz_km));
+
+  document.getElementById('metrics-grid').innerHTML = `
+    <div class="metric-card"><div class="metric-label">Aktivitäten</div><div class="metric-value">${valid.length}</div></div>
+    <div class="metric-card"><div class="metric-label">Distanz gesamt</div><div class="metric-value">${Math.round(totalKm).toLocaleString('de')}<span class="metric-unit"> km</span></div></div>
+    <div class="metric-card"><div class="metric-label">Zeit gesamt</div><div class="metric-value">${Math.round(totalH)}<span class="metric-unit"> h</span></div></div>
+    <div class="metric-card"><div class="metric-label">Kalorien</div><div class="metric-value">${Math.round(totalKcal).toLocaleString('de')}<span class="metric-unit"> kcal</span></div></div>
+    <div class="metric-card"><div class="metric-label">Ø Geschwindigkeit</div><div class="metric-value">${avgSpeed.toFixed(1)}<span class="metric-unit"> km/h</span></div></div>
+    <div class="metric-card"><div class="metric-label">Ø Leistung</div><div class="metric-value">${Math.round(avgW)}<span class="metric-unit"> W</span></div></div>
+    <div class="metric-card"><div class="metric-label">Ø Herzfrequenz</div><div class="metric-value">${Math.round(avgHR)}<span class="metric-unit"> bpm</span></div></div>
+    <div class="metric-card"><div class="metric-label">Längste Einheit</div><div class="metric-value">${maxDist.toFixed(1)}<span class="metric-unit"> km</span></div></div>
+  `;
+
+  // Monatsdaten
+  const byMonth = {};
+  valid.forEach(a => {
+    const m = a.datum.slice(0,7);
+    if (!byMonth[m]) byMonth[m] = { km:0, w:[], count:0 };
+    byMonth[m].km += a.distanz_km;
+    byMonth[m].count++;
+    if (a.avg_power_w > 0) byMonth[m].w.push(a.avg_power_w);
+  });
+  const months = Object.keys(byMonth).sort().slice(-13);
+  const kmData = months.map(m => Math.round(byMonth[m].km));
+  const wData = months.map(m => byMonth[m].w.length ? Math.round(byMonth[m].w.reduce((a,b)=>a+b)/byMonth[m].w.length) : null);
+  const monthLabels = months.map(m => { const [y,mo] = m.split('-'); return ['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+mo-1]+' '+y.slice(2); });
+
+  if (charts.monat) charts.monat.destroy();
+  charts.monat = new Chart(document.getElementById('c_monat'), {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'km', data: kmData, backgroundColor: 'rgba(79,124,255,0.7)', yAxisID: 'y' },
+        { label: 'W', data: wData, type: 'line', borderColor: '#10b981', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, pointBackgroundColor: '#10b981', yAxisID: 'y2', spanGaps: true }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#5a6072', font: { size: 11 }, maxRotation: 45, autoSkip: false }, grid: { display: false }, border: { display: false } },
+        y: { position: 'left', ticks: { color: '#5a6072', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
+        y2: { position: 'right', ticks: { color: '#10b981', font: { size: 11 } }, grid: { display: false }, border: { display: false }, min: 0 }
+      }
+    }
+  });
+
+  // HF Zonen
+  const withHR = valid.filter(a => a.avg_hr > 80);
+  const z1 = withHR.filter(a=>a.avg_hr<124).length;
+  const z2 = withHR.filter(a=>a.avg_hr>=124&&a.avg_hr<145).length;
+  const z3 = withHR.filter(a=>a.avg_hr>=145&&a.avg_hr<163).length;
+  const z4 = withHR.filter(a=>a.avg_hr>=163&&a.avg_hr<178).length;
+  const z5 = withHR.filter(a=>a.avg_hr>=178).length;
+  const total = withHR.length || 1;
+  const zones = [
+    { label: 'Z1 · Erholung\n< 124 bpm', count: z1, color: '#10b981' },
+    { label: 'Z2 · Ausdauer\n124–144 bpm', count: z2, color: '#84cc16' },
+    { label: 'Z3 · Tempo\n145–162 bpm', count: z3, color: '#f59e0b' },
+    { label: 'Z4 · Schwelle\n163–177 bpm', count: z4, color: '#f97316' },
+    { label: 'Z5 · VO2max\n> 177 bpm', count: z5, color: '#ef4444' },
+  ];
+  document.getElementById('zone-bars').innerHTML = zones.map(z => {
+    const pct = Math.round(z.count / total * 100);
+    const lines = z.label.split('\n');
+    return `<div class="zone-row">
+      <div class="zone-label">${lines[0]}<br><span style="color:var(--muted)">${lines[1]}</span></div>
+      <div class="zone-track"><div class="zone-fill" style="width:${pct}%;background:${z.color}">${pct > 8 ? pct+'%' : ''}</div></div>
+      <div class="zone-count">${z.count} Einh.</div>
+    </div>`;
+  }).join('');
+
+  // Dauer Verteilung
+  const d1 = valid.filter(a=>a.dauer_min<45).length;
+  const d2 = valid.filter(a=>a.dauer_min>=45&&a.dauer_min<=75).length;
+  const d3 = valid.filter(a=>a.dauer_min>75&&a.dauer_min<=120).length;
+  const d4 = valid.filter(a=>a.dauer_min>120).length;
+  if (charts.dauer) charts.dauer.destroy();
+  charts.dauer = new Chart(document.getElementById('c_dauer'), {
+    type: 'doughnut',
+    data: {
+      labels: ['< 45 min','45–75 min','75–120 min','> 120 min'],
+      datasets: [{ data: [d1,d2,d3,d4], backgroundColor: ['#4f7cff','#10b981','#f59e0b','#f472b6'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: true, position: 'right', labels: { color: '#8892a4', font: { size: 11 }, boxWidth: 10, padding: 8 } } } }
+  });
+
+  // Trend
+  if (charts.trend) charts.trend.destroy();
+  charts.trend = new Chart(document.getElementById('c_trend'), {
+    type: 'line',
+    data: {
+      labels: monthLabels,
+      datasets: [{ label: 'Ø W', data: wData, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.08)', tension: 0.4, fill: true, pointRadius: 2, pointBackgroundColor: '#8b5cf6', spanGaps: true }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#5a6072', font: { size: 11 }, maxRotation: 45, autoSkip: true }, grid: { display: false }, border: { display: false } },
+        y: { ticks: { color: '#5a6072', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } }
+      }
+    }
+  });
+
+  // Top 10 Tabelle
+  const top10 = [...valid].sort((a,b) => b.distanz_km - a.distanz_km).slice(0,10);
+  const colors = ['rgba(239,68,68,0.15)','rgba(245,158,11,0.15)','rgba(16,185,129,0.15)'];
+  const textColors = ['#ef4444','#f59e0b','#10b981'];
+  document.getElementById('top-table').innerHTML = top10.map((a,i) => {
+    const ci = a.distanz_km > 100 ? 0 : a.distanz_km > 70 ? 1 : 2;
+    return `<tr>
+      <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px">${String(i+1).padStart(2,'0')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${a.datum}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</td>
+      <td><span class="badge" style="background:${colors[ci]};color:${textColors[ci]}">${a.distanz_km.toFixed(1)} km</span></td>
+      <td>${Math.round(a.dauer_min)} min</td>
+      <td>${a.avg_power_w > 0 ? Math.round(a.avg_power_w)+' W' : '—'}</td>
+      <td>${a.avg_hr > 0 ? Math.round(a.avg_hr)+' bpm' : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
