@@ -174,7 +174,14 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Outdoor km</div>
         <div class="legend-item"><span class="legend-dot" style="background:#f472b6;border-radius:50%"></span>Ø Watt</div>
       </div>
-      <div class="cw" style="height:260px"><canvas id="c_monat" role="img" aria-label="Distanz Indoor Outdoor und Watt">Monatsdaten</canvas></div>
+      <div class="cw" style="height:260px"><canvas id="c_monat"></canvas></div>
+    </div>
+
+    <div class="section-label">VO2max Entwicklung</div>
+    <div class="chart-card">
+      <div class="chart-title">VO2max Verlauf</div>
+      <div class="chart-sub" id="vo2max-sub">Wird geladen...</div>
+      <div class="cw" style="height:200px"><canvas id="c_vo2max"></canvas></div>
     </div>
 
     <div class="section-label">Herzfrequenzzonen</div>
@@ -203,12 +210,12 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       <div class="chart-card" style="margin-bottom:0">
         <div class="chart-title">Verteilung nach Dauer</div>
         <div class="chart-sub">Anteil der Einheiten</div>
-        <div class="cw" style="height:200px"><canvas id="c_dauer" role="img" aria-label="Dauer">Dauer</canvas></div>
+        <div class="cw" style="height:200px"><canvas id="c_dauer"></canvas></div>
       </div>
       <div class="chart-card" style="margin-bottom:0">
         <div class="chart-title">Leistungstrend</div>
         <div class="chart-sub">Watt pro Monat (gesamt)</div>
-        <div class="cw" style="height:200px"><canvas id="c_trend" role="img" aria-label="Trend">Trend</canvas></div>
+        <div class="cw" style="height:200px"><canvas id="c_trend"></canvas></div>
       </div>
     </div>
 
@@ -227,7 +234,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 <script>
 const BACKEND='https://web-production-9e162.up.railway.app';
-let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='',allActivities=[];
+let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='',savedEmail='',savedPw='',allActivities=[];
 
 function isIndoor(a){
   const n=(a.name||'').toLowerCase();
@@ -239,7 +246,7 @@ function isIndoor(a){
 
 function selectSport(s){selectedSport=s;document.getElementById('btn-cycling').classList.toggle('active',s==='cycling');document.getElementById('btn-running').classList.toggle('active',s==='running');}
 function show(id){['login-screen','loading-screen','dashboard-screen'].forEach(s=>{const el=document.getElementById(s);el.style.display=s===id?(s==='loading-screen'?'flex':'block'):'none';});}
-function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';allActivities=[];document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';show('login-screen');}
+function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';savedEmail='';savedPw='';allActivities=[];document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';show('login-screen');}
 
 function updateWattZones(){
   const ftp=parseInt(document.getElementById('ftp-dashboard').value)||0;
@@ -247,11 +254,11 @@ function updateWattZones(){
   const withW=allActivities.filter(a=>a.avg_power_w>0);
   const tot=withW.length||1;
   const zones=[
-    {label:'Z1 Erholung\nUnter '+(Math.round(ftp*0.55))+' W',min:0,max:ftp*0.55,color:'#10b981'},
-    {label:'Z2 Ausdauer\n'+(Math.round(ftp*0.55))+'-'+(Math.round(ftp*0.75))+' W',min:ftp*0.55,max:ftp*0.75,color:'#84cc16'},
-    {label:'Z3 Tempo\n'+(Math.round(ftp*0.75))+'-'+(Math.round(ftp*0.90))+' W',min:ftp*0.75,max:ftp*0.90,color:'#f59e0b'},
-    {label:'Z4 Schwelle\n'+(Math.round(ftp*0.90))+'-'+(Math.round(ftp*1.05))+' W',min:ftp*0.90,max:ftp*1.05,color:'#f97316'},
-    {label:'Z5 VO2max\nUeber '+(Math.round(ftp*1.05))+' W',min:ftp*1.05,max:9999,color:'#ef4444'},
+    {label:'Z1 Erholung\nUnter '+Math.round(ftp*0.55)+' W',min:0,max:ftp*0.55,color:'#10b981'},
+    {label:'Z2 Ausdauer\n'+Math.round(ftp*0.55)+'-'+Math.round(ftp*0.75)+' W',min:ftp*0.55,max:ftp*0.75,color:'#84cc16'},
+    {label:'Z3 Tempo\n'+Math.round(ftp*0.75)+'-'+Math.round(ftp*0.90)+' W',min:ftp*0.75,max:ftp*0.90,color:'#f59e0b'},
+    {label:'Z4 Schwelle\n'+Math.round(ftp*0.90)+'-'+Math.round(ftp*1.05)+' W',min:ftp*0.90,max:ftp*1.05,color:'#f97316'},
+    {label:'Z5 VO2max\nUeber '+Math.round(ftp*1.05)+' W',min:ftp*1.05,max:9999,color:'#ef4444'},
   ];
   document.getElementById('watt-zone-sub').textContent='Basierend auf FTP: '+ftp+' W';
   document.getElementById('ftp-hint').textContent='FTP '+ftp+' W gesetzt';
@@ -263,6 +270,44 @@ function updateWattZones(){
   }).join('');
 }
 
+async function loadVO2max(){
+  try{
+    const res=await fetch(BACKEND+'/api/vo2max',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_password:savedAppPw,email:savedEmail,password:savedPw})});
+    const data=await res.json();
+    if(data.vo2max&&data.vo2max.length>0){
+      const sorted=data.vo2max.sort((a,b)=>a.datum.localeCompare(b.datum));
+      const labels=sorted.map(d=>d.datum);
+      const values=sorted.map(d=>d.vo2max);
+      const latest=values[values.length-1];
+      const first=values[0];
+      const diff=(latest-first).toFixed(1);
+      const trend=diff>0?'+'+diff:diff;
+      document.getElementById('vo2max-sub').textContent='Aktuell: '+latest+' ml/kg/min · Entwicklung: '+trend+' ml/kg/min';
+      if(charts.vo2max)charts.vo2max.destroy();
+      charts.vo2max=new Chart(document.getElementById('c_vo2max'),{
+        type:'line',
+        data:{labels,datasets:[{
+          label:'VO2max',data:values,
+          borderColor:'#f59e0b',
+          backgroundColor:'rgba(245,158,11,0.08)',
+          tension:0.4,fill:true,
+          pointRadius:4,pointBackgroundColor:'#f59e0b',
+          pointBorderColor:'var(--bg)',pointBorderWidth:2
+        }]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+          x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},
+          y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false},min:Math.max(0,Math.min(...values)-5),max:Math.max(...values)+5}
+        }}
+      });
+    } else {
+      document.getElementById('vo2max-sub').textContent='Keine VO2max Daten verfuegbar';
+      document.getElementById('c_vo2max').parentElement.innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace;padding:1rem 0">Garmin hat fuer diesen Account keine VO2max Daten gespeichert.</p>';
+    }
+  }catch(e){
+    document.getElementById('vo2max-sub').textContent='VO2max konnte nicht geladen werden';
+  }
+}
+
 async function startLoad(){
   const appPw=document.getElementById('app-password').value.trim();
   const email=document.getElementById('garmin-email').value.trim();
@@ -271,7 +316,7 @@ async function startLoad(){
   const errEl=document.getElementById('error-msg');
   errEl.style.display='none';
   if(!appPw||!email||!pw){errEl.textContent='Bitte alle Felder ausfullen.';errEl.style.display='block';return;}
-  savedAppPw=appPw;
+  savedAppPw=appPw;savedEmail=email;savedPw=pw;
   show('loading-screen');
   const texts=['Verbinde mit Garmin...','Lade Aktivitaeten...','Berechne Statistiken...','Baue Dashboard...'];
   let i=0;
@@ -287,6 +332,7 @@ async function startLoad(){
     if(!res.ok||data.error){show('login-screen');errEl.textContent=data.error||'Fehler beim Laden.';errEl.style.display='block';return;}
     buildDashboard(data.activities,selectedSport,ftpLogin);
     show('dashboard-screen');
+    loadVO2max();
   }catch(e){clearInterval(interval);show('login-screen');errEl.textContent='Server nicht erreichbar.';errEl.style.display='block';}
 }
 
@@ -313,8 +359,7 @@ function buildDashboard(acts,sport,ftpLogin){
   allActivities.sort((a,b)=>a.datum.localeCompare(b.datum));
   const valid=allActivities;
   document.getElementById('sport-badge').textContent=sport==='cycling'?'Rennrad':'Laufen';
-
-  if(ftpLogin){document.getElementById('ftp-dashboard').value=ftpLogin;}
+  if(ftpLogin)document.getElementById('ftp-dashboard').value=ftpLogin;
 
   const indoor=valid.filter(a=>isIndoor(a));
   const outdoor=valid.filter(a=>!isIndoor(a));
