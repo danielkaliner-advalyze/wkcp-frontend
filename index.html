@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Garmin Training Dashboard</title>
+<title>Redpulse Training Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
@@ -57,6 +57,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 .cw{position:relative;width:100%;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;}
+.compare-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;}
+.compare-title{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;font-family:'DM Mono',monospace;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+.compare-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.03);}
+.compare-row:last-child{border-bottom:none;}
+.compare-row span:first-child{color:var(--muted);}
+.compare-row span:last-child{font-weight:500;}
 .zone-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .zone-label{width:100px;flex-shrink:0;color:var(--muted2);font-family:'DM Mono',monospace;font-size:10px;line-height:1.4;}
 .zone-track{flex:1;height:18px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;}
@@ -76,15 +83,15 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .ai-text{font-size:14px;line-height:1.9;color:var(--muted2);}
 .ai-loading{display:flex;gap:8px;align-items:center;color:var(--muted);}
 .ai-spinner{width:14px;height:14px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
-@media(max-width:600px){.main,.topbar{padding:1rem;}.grid-2{grid-template-columns:1fr;}.metric-value{font-size:20px;}}
+@media(max-width:600px){.main,.topbar{padding:1rem;}.grid-2,.compare-grid{grid-template-columns:1fr;}.metric-value{font-size:20px;}}
 </style>
 </head>
 <body>
 
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">Garmin Training</div>
-    <div class="login-tagline">// dashboard</div>
+    <div class="login-logo">Redpulse</div>
+    <div class="login-tagline">// training dashboard</div>
     <div class="form-group">
       <label class="form-label">App-Passwort</label>
       <input type="password" class="form-input" id="app-password" placeholder="Passwort eingeben">
@@ -124,7 +131,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 <div id="dashboard-screen">
   <div class="topbar">
-    <div class="topbar-logo">Garmin Training</div>
+    <div class="topbar-logo">Redpulse</div>
     <div class="topbar-right">
       <div class="topbar-sport" id="sport-badge">Rennrad</div>
       <button class="logout-btn" onclick="logout()">Abmelden</button>
@@ -139,15 +146,25 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div class="ai-badge" id="ai-badge">wird generiert...</div>
       </div>
       <div class="ai-text" id="ai-text">
-        <div class="ai-loading">
-          <div class="ai-spinner"></div>
-          <span>Analysiere deine Trainingsdaten...</span>
-        </div>
+        <div class="ai-loading"><div class="ai-spinner"></div><span>Analysiere deine Trainingsdaten...</span></div>
       </div>
     </div>
 
     <div class="section-label">Gesamtuebersicht</div>
     <div class="metrics-grid" id="metrics-grid"></div>
+
+    <div class="section-label">Indoor vs. Outdoor</div>
+    <div class="compare-grid" id="compare-cards"></div>
+
+    <div class="chart-card">
+      <div class="chart-title">Indoor vs. Outdoor — Einheiten pro Monat</div>
+      <div class="chart-sub">Saisonaler Wechsel</div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>Indoor</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Outdoor</div>
+      </div>
+      <div class="cw" style="height:200px"><canvas id="c_inout" role="img" aria-label="Indoor vs Outdoor">Indoor Outdoor</canvas></div>
+    </div>
 
     <div class="section-label">Entwicklung pro Monat</div>
     <div class="chart-card">
@@ -191,12 +208,19 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </table>
     </div>
   </div>
-  <div class="footer">Garmin Training Dashboard - Powered by Garmin Connect and Claude AI</div>
+  <div class="footer">Redpulse Training Dashboard - Powered by Garmin Connect and Claude AI</div>
 </div>
 
 <script>
 const BACKEND='https://web-production-9e162.up.railway.app';
 let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='';
+
+function isIndoor(a){
+  const n=(a.name||'').toLowerCase();
+  const t=(a.type_key||'').toLowerCase();
+  return n.includes('indoor')||n.includes('trainer')||n.includes('rolle')||t.includes('indoor')||
+    (a.elevation_m===0&&a.avg_hr>0&&a.distanz_km>0&&a.distanz_km<70&&!n.includes('hamburg')&&!n.includes('berlin')&&!n.includes('outdoor')&&!n.includes('rennrad')&&!n.includes('harz')&&!n.includes('spreewald'));
+}
 
 function selectSport(s){selectedSport=s;document.getElementById('btn-cycling').classList.toggle('active',s==='cycling');document.getElementById('btn-running').classList.toggle('active',s==='running');}
 function show(id){['login-screen','loading-screen','dashboard-screen'].forEach(s=>{const el=document.getElementById(s);el.style.display=s===id?(s==='loading-screen'?'flex':'block'):'none';});}
@@ -255,11 +279,7 @@ async function generateAISummary(acts,sport){
   }).join('\n');
   const prompt='Du bist ein persoenlicher Trainingsanalyst. Analysiere diese '+sportName+'-Daten und schreibe eine motivierende, persoenliche Zusammenfassung auf Deutsch. Nutze die echten Zahlen. Maximal 120 Woerter. Verwende Emojis. Struktur: Gesamtbilanz, Jahresentwicklung mit Trend, ein besonderes Highlight.\n\nDaten:\n- Gesamt: '+totalKm.toLocaleString('de')+' km in '+totalH+' Stunden, '+acts.length+' Aktivitaeten, '+totalKcal.toLocaleString('de')+' kcal\n- Laengste Einheit: '+maxAct.distanz_km.toFixed(1)+' km am '+maxAct.datum+'\n- Pro Jahr:\n'+yearSummary;
   try{
-    const res=await fetch(BACKEND+'/api/ai_summary',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({app_password:savedAppPw,prompt})
-    });
+    const res=await fetch(BACKEND+'/api/ai_summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_password:savedAppPw,prompt})});
     const data=await res.json();
     if(data.text){
       document.getElementById('ai-text').innerHTML=data.text.replace(/\n/g,'<br>');
@@ -281,6 +301,10 @@ function buildDashboard(acts,sport){
   const valid=acts.filter(a=>a.dauer_min>5&&a.distanz_km>0);
   valid.sort((a,b)=>a.datum.localeCompare(b.datum));
   document.getElementById('sport-badge').textContent=sport==='cycling'?'Rennrad':'Laufen';
+
+  const indoor=valid.filter(a=>isIndoor(a));
+  const outdoor=valid.filter(a=>!isIndoor(a));
+
   const totalKm=valid.reduce((s,a)=>s+a.distanz_km,0);
   const totalH=valid.reduce((s,a)=>s+a.dauer_min,0)/60;
   const totalKcal=valid.reduce((s,a)=>s+a.kalorien,0);
@@ -291,24 +315,64 @@ function buildDashboard(acts,sport){
   const wH=valid.filter(a=>a.avg_hr>0);
   const avgHR=wH.length?wH.reduce((s,a)=>s+a.avg_hr,0)/wH.length:0;
   const maxDist=Math.max(...valid.map(a=>a.distanz_km));
+
   document.getElementById('metrics-grid').innerHTML='<div class="metric-card"><div class="metric-label">Aktivitaeten</div><div class="metric-value">'+valid.length+'</div></div><div class="metric-card"><div class="metric-label">Distanz gesamt</div><div class="metric-value">'+Math.round(totalKm).toLocaleString('de')+'<span class="metric-unit"> km</span></div></div><div class="metric-card"><div class="metric-label">Zeit gesamt</div><div class="metric-value">'+Math.round(totalH)+'<span class="metric-unit"> h</span></div></div><div class="metric-card"><div class="metric-label">Kalorien</div><div class="metric-value">'+Math.round(totalKcal).toLocaleString('de')+'<span class="metric-unit"> kcal</span></div></div><div class="metric-card"><div class="metric-label">Geschwindigkeit</div><div class="metric-value">'+avgSpeed.toFixed(1)+'<span class="metric-unit"> km/h</span></div></div><div class="metric-card"><div class="metric-label">Leistung</div><div class="metric-value">'+Math.round(avgW)+'<span class="metric-unit"> W</span></div></div><div class="metric-card"><div class="metric-label">Herzfrequenz</div><div class="metric-value">'+Math.round(avgHR)+'<span class="metric-unit"> bpm</span></div></div><div class="metric-card"><div class="metric-label">Laengste Einheit</div><div class="metric-value">'+maxDist.toFixed(1)+'<span class="metric-unit"> km</span></div></div>';
+
+  function statRow(label,val){return '<div class="compare-row"><span>'+label+'</span><span>'+val+'</span></div>';}
+  function avg(arr,key){const f=arr.filter(a=>a[key]>0);return f.length?Math.round(f.reduce((s,a)=>s+a[key],0)/f.length):0;}
+
+  document.getElementById('compare-cards').innerHTML=
+    '<div class="compare-card"><div class="compare-title" style="color:#4f7cff">Indoor — Trainer/Rolle</div>'+
+    statRow('Einheiten',indoor.length)+
+    statRow('Distanz gesamt',Math.round(indoor.reduce((s,a)=>s+a.distanz_km,0))+' km')+
+    statRow('Ø Distanz',Math.round(indoor.reduce((s,a)=>s+a.distanz_km,0)/(indoor.length||1))+' km')+
+    statRow('Ø Dauer',Math.round(indoor.reduce((s,a)=>s+a.dauer_min,0)/(indoor.length||1))+' min')+
+    statRow('Ø Watt',avg(indoor,'avg_power_w')+' W')+
+    statRow('Ø Herzfrequenz',avg(indoor,'avg_hr')+' bpm')+
+    '</div>'+
+    '<div class="compare-card"><div class="compare-title" style="color:#10b981">Outdoor — Strasse</div>'+
+    statRow('Einheiten',outdoor.length)+
+    statRow('Distanz gesamt',Math.round(outdoor.reduce((s,a)=>s+a.distanz_km,0))+' km')+
+    statRow('Ø Distanz',Math.round(outdoor.reduce((s,a)=>s+a.distanz_km,0)/(outdoor.length||1))+' km')+
+    statRow('Ø Dauer',Math.round(outdoor.reduce((s,a)=>s+a.dauer_min,0)/(outdoor.length||1))+' min')+
+    statRow('Ø Watt',avg(outdoor,'avg_power_w')+' W')+
+    statRow('Ø Herzfrequenz',avg(outdoor,'avg_hr')+' bpm')+
+    '</div>';
+
   const byMonth={};
-  valid.forEach(a=>{const m=a.datum.slice(0,7);if(!byMonth[m])byMonth[m]={km:0,w:[]};byMonth[m].km+=a.distanz_km;if(a.avg_power_w>0)byMonth[m].w.push(a.avg_power_w);});
+  valid.forEach(a=>{
+    const m=a.datum.slice(0,7);
+    if(!byMonth[m])byMonth[m]={km:0,w:[],indoor:0,outdoor:0};
+    byMonth[m].km+=a.distanz_km;
+    if(a.avg_power_w>0)byMonth[m].w.push(a.avg_power_w);
+    if(isIndoor(a))byMonth[m].indoor++;else byMonth[m].outdoor++;
+  });
   const months=Object.keys(byMonth).sort().slice(-13);
   const kmData=months.map(m=>Math.round(byMonth[m].km));
   const wData=months.map(m=>byMonth[m].w.length?Math.round(byMonth[m].w.reduce((a,b)=>a+b)/byMonth[m].w.length):null);
+  const indoorData=months.map(m=>byMonth[m].indoor);
+  const outdoorData=months.map(m=>byMonth[m].outdoor);
   const ml=months.map(m=>{const p=m.split('-');return['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+p[1]-1]+' '+p[0].slice(2);});
+
+  if(charts.inout)charts.inout.destroy();
+  charts.inout=new Chart(document.getElementById('c_inout'),{type:'bar',data:{labels:ml,datasets:[{label:'Indoor',data:indoorData,backgroundColor:'rgba(79,124,255,0.7)',stack:'s'},{label:'Outdoor',data:outdoorData,backgroundColor:'rgba(16,185,129,0.7)',stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,ticks:{color:'#5a6072',font:{size:11},maxRotation:45,autoSkip:false},grid:{display:false},border:{display:false}},y:{stacked:true,ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
+
   if(charts.monat)charts.monat.destroy();
   charts.monat=new Chart(document.getElementById('c_monat'),{type:'bar',data:{labels:ml,datasets:[{label:'km',data:kmData,backgroundColor:'rgba(79,124,255,0.7)',yAxisID:'y'},{label:'W',data:wData,type:'line',borderColor:'#10b981',backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:'#10b981',yAxisID:'y2',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:11},maxRotation:45,autoSkip:false},grid:{display:false},border:{display:false}},y:{position:'left',ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}},y2:{position:'right',ticks:{color:'#10b981',font:{size:11}},grid:{display:false},border:{display:false},min:0}}}});
+
   const z1=wH.filter(a=>a.avg_hr<124).length,z2=wH.filter(a=>a.avg_hr>=124&&a.avg_hr<145).length,z3=wH.filter(a=>a.avg_hr>=145&&a.avg_hr<163).length,z4=wH.filter(a=>a.avg_hr>=163&&a.avg_hr<178).length,z5=wH.filter(a=>a.avg_hr>=178).length,tot=wH.length||1;
   document.getElementById('zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter 124 bpm',count:z1,color:'#10b981'},{label:'Z2 Ausdauer\n124-144 bpm',count:z2,color:'#84cc16'},{label:'Z3 Tempo\n145-162 bpm',count:z3,color:'#f59e0b'},{label:'Z4 Schwelle\n163-177 bpm',count:z4,color:'#f97316'},{label:'Z5 VO2max\nUeber 177 bpm',count:z5,color:'#ef4444'}].map(z=>{const pct=Math.round(z.count/tot*100),lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+z.count+' Einh.</div></div>';}).join('');
+
   const d1=valid.filter(a=>a.dauer_min<45).length,d2=valid.filter(a=>a.dauer_min>=45&&a.dauer_min<=75).length,d3=valid.filter(a=>a.dauer_min>75&&a.dauer_min<=120).length,d4=valid.filter(a=>a.dauer_min>120).length;
   if(charts.dauer)charts.dauer.destroy();
   charts.dauer=new Chart(document.getElementById('c_dauer'),{type:'doughnut',data:{labels:['Unter 45 min','45-75 min','75-120 min','Ueber 120 min'],datasets:[{data:[d1,d2,d3,d4],backgroundColor:['#4f7cff','#10b981','#f59e0b','#f472b6'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'right',labels:{color:'#8892a4',font:{size:11},boxWidth:10,padding:8}}}}});
+
   if(charts.trend)charts.trend.destroy();
   charts.trend=new Chart(document.getElementById('c_trend'),{type:'line',data:{labels:ml,datasets:[{label:'W',data:wData,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',tension:0.4,fill:true,pointRadius:2,pointBackgroundColor:'#8b5cf6',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:11},maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
+
   const top10=[...valid].sort((a,b)=>b.distanz_km-a.distanz_km).slice(0,10);
   document.getElementById('top-table').innerHTML=top10.map((a,i)=>{const ci=a.distanz_km>100?0:a.distanz_km>70?1:2;const colors=['rgba(239,68,68,0.15)','rgba(245,158,11,0.15)','rgba(16,185,129,0.15)'],tc=['#ef4444','#f59e0b','#10b981'];return'<tr><td style="color:var(--muted);font-family:DM Mono,monospace;font-size:11px">'+String(i+1).padStart(2,'0')+'</td><td style="font-family:DM Mono,monospace;font-size:11px">'+a.datum+'</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.name+'</td><td><span class="badge" style="background:'+colors[ci]+';color:'+tc[ci]+'">'+a.distanz_km.toFixed(1)+' km</span></td><td>'+Math.round(a.dauer_min)+' min</td><td>'+(a.avg_power_w>0?Math.round(a.avg_power_w)+' W':'--')+'</td><td>'+(a.avg_hr>0?Math.round(a.avg_hr)+' bpm':'--')+'</td></tr>';}).join('');
+
   generateAISummary(valid,sport);
 }
 </script>
