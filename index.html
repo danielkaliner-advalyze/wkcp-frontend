@@ -64,11 +64,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .compare-row:last-child{border-bottom:none;}
 .compare-row span:first-child{color:var(--muted);}
 .compare-row span:last-child{font-weight:500;}
-.zone-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.zone-label{width:100px;flex-shrink:0;color:var(--muted2);font-family:'DM Mono',monospace;font-size:10px;line-height:1.4;}
-.zone-track{flex:1;height:18px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;}
-.zone-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;font-size:10px;font-weight:500;font-family:'DM Mono',monospace;color:rgba(0,0,0,0.75);}
-.zone-count{width:50px;text-align:right;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;flex-shrink:0;}
+.zone-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.zone-label{width:110px;flex-shrink:0;color:var(--muted2);font-family:'DM Mono',monospace;font-size:10px;line-height:1.4;}
+.zone-track{flex:1;height:20px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;}
+.zone-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:10px;font-weight:500;font-family:'DM Mono',monospace;color:rgba(0,0,0,0.8);}
+.zone-count{width:55px;text-align:right;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;flex-shrink:0;}
+.ftp-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem;background:rgba(79,124,255,0.06);border:1px solid rgba(79,124,255,0.15);border-radius:8px;padding:10px 14px;}
+.ftp-label{font-size:12px;color:var(--muted2);font-family:'DM Mono',monospace;flex-shrink:0;}
+.ftp-input{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-size:14px;font-family:'DM Mono',monospace;width:80px;outline:none;text-align:center;}
+.ftp-btn{padding:6px 14px;background:var(--accent);border:none;border-radius:6px;color:white;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;}
+.ftp-hint{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:0.07em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;}
 td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,0.03);}
@@ -111,6 +116,10 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <button class="sport-btn active" id="btn-cycling" onclick="selectSport('cycling')">Rennrad</button>
         <button class="sport-btn" id="btn-running" onclick="selectSport('running')">Laufen</button>
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">FTP (Watt) — optional</label>
+      <input type="number" class="form-input" id="ftp-input" placeholder="z.B. 220" min="50" max="600">
     </div>
     <div class="mfa-box" id="mfa-box">
       <div class="mfa-box-title">Zwei-Faktor-Code erforderlich</div>
@@ -156,7 +165,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     <div class="section-label">Indoor vs. Outdoor</div>
     <div class="compare-grid" id="compare-cards"></div>
 
-    <div class="section-label">Distanz, Leistung und Indoor/Outdoor — letzte 24 Monate</div>
+    <div class="section-label">Distanz — letzte 24 Monate</div>
     <div class="chart-card">
       <div class="chart-title">Distanz pro Monat</div>
       <div class="chart-sub">Indoor und Outdoor aufgeteilt · letzte 24 Monate</div>
@@ -170,9 +179,23 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
     <div class="section-label">Herzfrequenzzonen</div>
     <div class="chart-card">
-      <div class="chart-title">Zonenverteilung</div>
+      <div class="chart-title">HF-Zonenverteilung</div>
       <div class="chart-sub">Alle Einheiten mit HF-Daten</div>
-      <div id="zone-bars" style="margin-top:1rem"></div>
+      <div id="hf-zone-bars" style="margin-top:1rem"></div>
+    </div>
+
+    <div class="section-label">Wattzonen</div>
+    <div class="chart-card">
+      <div class="chart-title">Watt-Zonenverteilung</div>
+      <div class="chart-sub" id="watt-zone-sub">Basierend auf deinem FTP</div>
+      <div class="ftp-row">
+        <span class="ftp-label">FTP:</span>
+        <input type="number" class="ftp-input" id="ftp-dashboard" placeholder="220" min="50" max="600">
+        <span class="ftp-label">W</span>
+        <button class="ftp-btn" onclick="updateWattZones()">Berechnen</button>
+        <span class="ftp-hint" id="ftp-hint"></span>
+      </div>
+      <div id="watt-zone-bars" style="margin-top:0.5rem"></div>
     </div>
 
     <div class="section-label">Trainingsstruktur</div>
@@ -184,7 +207,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </div>
       <div class="chart-card" style="margin-bottom:0">
         <div class="chart-title">Leistungstrend</div>
-        <div class="chart-sub">Watt pro Monat</div>
+        <div class="chart-sub">Watt pro Monat (gesamt)</div>
         <div class="cw" style="height:200px"><canvas id="c_trend" role="img" aria-label="Trend">Trend</canvas></div>
       </div>
     </div>
@@ -204,7 +227,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 <script>
 const BACKEND='https://web-production-9e162.up.railway.app';
-let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='';
+let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='',allActivities=[];
 
 function isIndoor(a){
   const n=(a.name||'').toLowerCase();
@@ -216,12 +239,35 @@ function isIndoor(a){
 
 function selectSport(s){selectedSport=s;document.getElementById('btn-cycling').classList.toggle('active',s==='cycling');document.getElementById('btn-running').classList.toggle('active',s==='running');}
 function show(id){['login-screen','loading-screen','dashboard-screen'].forEach(s=>{const el=document.getElementById(s);el.style.display=s===id?(s==='loading-screen'?'flex':'block'):'none';});}
-function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';show('login-screen');}
+function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';allActivities=[];document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';show('login-screen');}
+
+function updateWattZones(){
+  const ftp=parseInt(document.getElementById('ftp-dashboard').value)||0;
+  if(!ftp||ftp<50){document.getElementById('watt-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px">Bitte FTP eingeben.</p>';return;}
+  const withW=allActivities.filter(a=>a.avg_power_w>0);
+  const tot=withW.length||1;
+  const zones=[
+    {label:'Z1 Erholung\nUnter '+(Math.round(ftp*0.55))+' W',min:0,max:ftp*0.55,color:'#10b981'},
+    {label:'Z2 Ausdauer\n'+(Math.round(ftp*0.55))+'-'+(Math.round(ftp*0.75))+' W',min:ftp*0.55,max:ftp*0.75,color:'#84cc16'},
+    {label:'Z3 Tempo\n'+(Math.round(ftp*0.75))+'-'+(Math.round(ftp*0.90))+' W',min:ftp*0.75,max:ftp*0.90,color:'#f59e0b'},
+    {label:'Z4 Schwelle\n'+(Math.round(ftp*0.90))+'-'+(Math.round(ftp*1.05))+' W',min:ftp*0.90,max:ftp*1.05,color:'#f97316'},
+    {label:'Z5 VO2max\nUeber '+(Math.round(ftp*1.05))+' W',min:ftp*1.05,max:9999,color:'#ef4444'},
+  ];
+  document.getElementById('watt-zone-sub').textContent='Basierend auf FTP: '+ftp+' W';
+  document.getElementById('ftp-hint').textContent='FTP '+ftp+' W gesetzt';
+  document.getElementById('watt-zone-bars').innerHTML=zones.map(z=>{
+    const count=withW.filter(a=>a.avg_power_w>=z.min&&a.avg_power_w<z.max).length;
+    const pct=Math.round(count/tot*100);
+    const lines=z.label.split('\n');
+    return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+count+' Einh.</div></div>';
+  }).join('');
+}
 
 async function startLoad(){
   const appPw=document.getElementById('app-password').value.trim();
   const email=document.getElementById('garmin-email').value.trim();
   const pw=document.getElementById('garmin-password').value.trim();
+  const ftpLogin=document.getElementById('ftp-input').value.trim();
   const errEl=document.getElementById('error-msg');
   errEl.style.display='none';
   if(!appPw||!email||!pw){errEl.textContent='Bitte alle Felder ausfullen.';errEl.style.display='block';return;}
@@ -237,14 +283,10 @@ async function startLoad(){
     const res=await fetch(BACKEND+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await res.json();
     clearInterval(interval);
-    if(data.error==='MFA_REQUIRED'||data.mfa){
-      mfaRequired=true;show('login-screen');
-      document.getElementById('mfa-box').style.display='block';
-      document.getElementById('submit-btn').textContent='Code bestaetigen und laden';
-      document.getElementById('mfa-code').focus();return;
-    }
+    if(data.error==='MFA_REQUIRED'||data.mfa){mfaRequired=true;show('login-screen');document.getElementById('mfa-box').style.display='block';document.getElementById('submit-btn').textContent='Code bestaetigen und laden';document.getElementById('mfa-code').focus();return;}
     if(!res.ok||data.error){show('login-screen');errEl.textContent=data.error||'Fehler beim Laden.';errEl.style.display='block';return;}
-    buildDashboard(data.activities,selectedSport);show('dashboard-screen');
+    buildDashboard(data.activities,selectedSport,ftpLogin);
+    show('dashboard-screen');
   }catch(e){clearInterval(interval);show('login-screen');errEl.textContent='Server nicht erreichbar.';errEl.style.display='block';}
 }
 
@@ -266,14 +308,16 @@ async function generateAISummary(acts,sport){
   }catch(e){document.getElementById('ai-text').textContent='KI-Analyse nicht verfuegbar.';document.getElementById('ai-badge').textContent='fehler';}
 }
 
-function buildDashboard(acts,sport){
-  const valid=acts.filter(a=>a.dauer_min>5&&a.distanz_km>0);
-  valid.sort((a,b)=>a.datum.localeCompare(b.datum));
+function buildDashboard(acts,sport,ftpLogin){
+  allActivities=acts.filter(a=>a.dauer_min>5&&a.distanz_km>0);
+  allActivities.sort((a,b)=>a.datum.localeCompare(b.datum));
+  const valid=allActivities;
   document.getElementById('sport-badge').textContent=sport==='cycling'?'Rennrad':'Laufen';
+
+  if(ftpLogin){document.getElementById('ftp-dashboard').value=ftpLogin;}
 
   const indoor=valid.filter(a=>isIndoor(a));
   const outdoor=valid.filter(a=>!isIndoor(a));
-
   const totalKm=valid.reduce((s,a)=>s+a.distanz_km,0);
   const totalH=valid.reduce((s,a)=>s+a.dauer_min,0)/60;
   const totalKcal=valid.reduce((s,a)=>s+a.kalorien,0);
@@ -287,34 +331,14 @@ function buildDashboard(acts,sport){
 
   document.getElementById('metrics-grid').innerHTML='<div class="metric-card"><div class="metric-label">Aktivitaeten</div><div class="metric-value">'+valid.length+'</div></div><div class="metric-card"><div class="metric-label">Distanz gesamt</div><div class="metric-value">'+Math.round(totalKm).toLocaleString('de')+'<span class="metric-unit"> km</span></div></div><div class="metric-card"><div class="metric-label">Zeit gesamt</div><div class="metric-value">'+Math.round(totalH)+'<span class="metric-unit"> h</span></div></div><div class="metric-card"><div class="metric-label">Kalorien</div><div class="metric-value">'+Math.round(totalKcal).toLocaleString('de')+'<span class="metric-unit"> kcal</span></div></div><div class="metric-card"><div class="metric-label">Geschwindigkeit</div><div class="metric-value">'+avgSpeed.toFixed(1)+'<span class="metric-unit"> km/h</span></div></div><div class="metric-card"><div class="metric-label">Leistung</div><div class="metric-value">'+Math.round(avgW)+'<span class="metric-unit"> W</span></div></div><div class="metric-card"><div class="metric-label">Herzfrequenz</div><div class="metric-value">'+Math.round(avgHR)+'<span class="metric-unit"> bpm</span></div></div><div class="metric-card"><div class="metric-label">Laengste Einheit</div><div class="metric-value">'+maxDist.toFixed(1)+'<span class="metric-unit"> km</span></div></div>';
 
-  function statRow(label,val){return '<div class="compare-row"><span>'+label+'</span><span>'+val+'</span></div>';}
+  function statRow(label,val){return'<div class="compare-row"><span>'+label+'</span><span>'+val+'</span></div>';}
   function avg(arr,key){const f=arr.filter(a=>a[key]>0);return f.length?Math.round(f.reduce((s,a)=>s+a[key],0)/f.length):0;}
-
   document.getElementById('compare-cards').innerHTML=
-    '<div class="compare-card"><div class="compare-title" style="color:#4f7cff">Indoor — Trainer/Rolle</div>'+
-    statRow('Einheiten',indoor.length)+
-    statRow('Distanz gesamt',Math.round(indoor.reduce((s,a)=>s+a.distanz_km,0))+' km')+
-    statRow('Ø Distanz',Math.round(indoor.reduce((s,a)=>s+a.distanz_km,0)/(indoor.length||1))+' km')+
-    statRow('Ø Dauer',Math.round(indoor.reduce((s,a)=>s+a.dauer_min,0)/(indoor.length||1))+' min')+
-    statRow('Ø Watt',avg(indoor,'avg_power_w')+' W')+
-    statRow('Ø Herzfrequenz',avg(indoor,'avg_hr')+' bpm')+
-    '</div>'+
-    '<div class="compare-card"><div class="compare-title" style="color:#10b981">Outdoor — Strasse</div>'+
-    statRow('Einheiten',outdoor.length)+
-    statRow('Distanz gesamt',Math.round(outdoor.reduce((s,a)=>s+a.distanz_km,0))+' km')+
-    statRow('Ø Distanz',Math.round(outdoor.reduce((s,a)=>s+a.distanz_km,0)/(outdoor.length||1))+' km')+
-    statRow('Ø Dauer',Math.round(outdoor.reduce((s,a)=>s+a.dauer_min,0)/(outdoor.length||1))+' min')+
-    statRow('Ø Watt',avg(outdoor,'avg_power_w')+' W')+
-    statRow('Ø Herzfrequenz',avg(outdoor,'avg_hr')+' bpm')+
-    '</div>';
+    '<div class="compare-card"><div class="compare-title" style="color:#4f7cff">Indoor — Trainer/Rolle</div>'+statRow('Einheiten',indoor.length)+statRow('Distanz gesamt',Math.round(indoor.reduce((s,a)=>s+a.distanz_km,0))+' km')+statRow('Ø Distanz',Math.round(indoor.reduce((s,a)=>s+a.distanz_km,0)/(indoor.length||1))+' km')+statRow('Ø Dauer',Math.round(indoor.reduce((s,a)=>s+a.dauer_min,0)/(indoor.length||1))+' min')+statRow('Ø Watt',avg(indoor,'avg_power_w')+' W')+statRow('Ø Herzfrequenz',avg(indoor,'avg_hr')+' bpm')+'</div>'+
+    '<div class="compare-card"><div class="compare-title" style="color:#10b981">Outdoor — Strasse</div>'+statRow('Einheiten',outdoor.length)+statRow('Distanz gesamt',Math.round(outdoor.reduce((s,a)=>s+a.distanz_km,0))+' km')+statRow('Ø Distanz',Math.round(outdoor.reduce((s,a)=>s+a.distanz_km,0)/(outdoor.length||1))+' km')+statRow('Ø Dauer',Math.round(outdoor.reduce((s,a)=>s+a.dauer_min,0)/(outdoor.length||1))+' min')+statRow('Ø Watt',avg(outdoor,'avg_power_w')+' W')+statRow('Ø Herzfrequenz',avg(outdoor,'avg_hr')+' bpm')+'</div>';
 
   const byMonth={};
-  valid.forEach(a=>{
-    const m=a.datum.slice(0,7);
-    if(!byMonth[m])byMonth[m]={kmIndoor:0,kmOutdoor:0,w:[]};
-    if(isIndoor(a))byMonth[m].kmIndoor+=a.distanz_km;else byMonth[m].kmOutdoor+=a.distanz_km;
-    if(a.avg_power_w>0)byMonth[m].w.push(a.avg_power_w);
-  });
+  valid.forEach(a=>{const m=a.datum.slice(0,7);if(!byMonth[m])byMonth[m]={kmIndoor:0,kmOutdoor:0,w:[]};if(isIndoor(a))byMonth[m].kmIndoor+=a.distanz_km;else byMonth[m].kmOutdoor+=a.distanz_km;if(a.avg_power_w>0)byMonth[m].w.push(a.avg_power_w);});
   const months=Object.keys(byMonth).sort().slice(-24);
   const kmIndoorData=months.map(m=>Math.round(byMonth[m].kmIndoor));
   const kmOutdoorData=months.map(m=>Math.round(byMonth[m].kmOutdoor));
@@ -322,22 +346,13 @@ function buildDashboard(acts,sport){
   const ml=months.map(m=>{const p=m.split('-');return['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+p[1]-1]+' '+p[0].slice(2);});
 
   if(charts.monat)charts.monat.destroy();
-  charts.monat=new Chart(document.getElementById('c_monat'),{
-    type:'bar',
-    data:{labels:ml,datasets:[
-      {label:'Indoor km',data:kmIndoorData,backgroundColor:'rgba(79,124,255,0.75)',stack:'km',yAxisID:'y'},
-      {label:'Outdoor km',data:kmOutdoorData,backgroundColor:'rgba(16,185,129,0.75)',stack:'km',yAxisID:'y'},
-      {label:'Ø Watt',data:wData,type:'line',borderColor:'#f472b6',backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:'#f472b6',yAxisID:'y2',spanGaps:true,borderDash:[]}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-      x:{stacked:true,ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},
-      y:{stacked:true,position:'left',ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}},
-      y2:{position:'right',ticks:{color:'#f472b6',font:{size:11}},grid:{display:false},border:{display:false},min:0}
-    }}
-  });
+  charts.monat=new Chart(document.getElementById('c_monat'),{type:'bar',data:{labels:ml,datasets:[{label:'Indoor km',data:kmIndoorData,backgroundColor:'rgba(79,124,255,0.75)',stack:'km',yAxisID:'y'},{label:'Outdoor km',data:kmOutdoorData,backgroundColor:'rgba(16,185,129,0.75)',stack:'km',yAxisID:'y'},{label:'Watt',data:wData,type:'line',borderColor:'#f472b6',backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:'#f472b6',yAxisID:'y2',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},y:{stacked:true,position:'left',ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}},y2:{position:'right',ticks:{color:'#f472b6',font:{size:11}},grid:{display:false},border:{display:false},min:0}}}});
 
   const z1=wH.filter(a=>a.avg_hr<124).length,z2=wH.filter(a=>a.avg_hr>=124&&a.avg_hr<145).length,z3=wH.filter(a=>a.avg_hr>=145&&a.avg_hr<163).length,z4=wH.filter(a=>a.avg_hr>=163&&a.avg_hr<178).length,z5=wH.filter(a=>a.avg_hr>=178).length,tot=wH.length||1;
-  document.getElementById('zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter 124 bpm',count:z1,color:'#10b981'},{label:'Z2 Ausdauer\n124-144 bpm',count:z2,color:'#84cc16'},{label:'Z3 Tempo\n145-162 bpm',count:z3,color:'#f59e0b'},{label:'Z4 Schwelle\n163-177 bpm',count:z4,color:'#f97316'},{label:'Z5 VO2max\nUeber 177 bpm',count:z5,color:'#ef4444'}].map(z=>{const pct=Math.round(z.count/tot*100),lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+z.count+' Einh.</div></div>';}).join('');
+  document.getElementById('hf-zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter 124 bpm',count:z1,color:'#10b981'},{label:'Z2 Ausdauer\n124-144 bpm',count:z2,color:'#84cc16'},{label:'Z3 Tempo\n145-162 bpm',count:z3,color:'#f59e0b'},{label:'Z4 Schwelle\n163-177 bpm',count:z4,color:'#f97316'},{label:'Z5 VO2max\nUeber 177 bpm',count:z5,color:'#ef4444'}].map(z=>{const pct=Math.round(z.count/tot*100),lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+z.count+' Einh.</div></div>';}).join('');
+
+  if(ftpLogin)updateWattZones();
+  else document.getElementById('watt-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">FTP eingeben und Berechnen klicken.</p>';
 
   const d1=valid.filter(a=>a.dauer_min<45).length,d2=valid.filter(a=>a.dauer_min>=45&&a.dauer_min<=75).length,d3=valid.filter(a=>a.dauer_min>75&&a.dauer_min<=120).length,d4=valid.filter(a=>a.dauer_min>120).length;
   if(charts.dauer)charts.dauer.destroy();
