@@ -156,25 +156,16 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     <div class="section-label">Indoor vs. Outdoor</div>
     <div class="compare-grid" id="compare-cards"></div>
 
+    <div class="section-label">Distanz, Leistung und Indoor/Outdoor — letzte 24 Monate</div>
     <div class="chart-card">
-      <div class="chart-title">Indoor vs. Outdoor — Einheiten pro Monat</div>
-      <div class="chart-sub">Saisonaler Wechsel</div>
+      <div class="chart-title">Distanz pro Monat</div>
+      <div class="chart-sub">Indoor und Outdoor aufgeteilt · letzte 24 Monate</div>
       <div class="legend">
-        <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>Indoor</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Outdoor</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>Indoor km</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Outdoor km</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#f472b6;border-radius:50%"></span>Ø Watt</div>
       </div>
-      <div class="cw" style="height:200px"><canvas id="c_inout" role="img" aria-label="Indoor vs Outdoor">Indoor Outdoor</canvas></div>
-    </div>
-
-    <div class="section-label">Entwicklung pro Monat</div>
-    <div class="chart-card">
-      <div class="chart-title">Distanz und Leistung</div>
-      <div class="chart-sub">Letzte 13 Monate</div>
-      <div class="legend">
-        <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>Distanz km</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Watt</div>
-      </div>
-      <div class="cw" style="height:220px"><canvas id="c_monat" role="img" aria-label="Monatliche Distanz">Monatsdaten</canvas></div>
+      <div class="cw" style="height:260px"><canvas id="c_monat" role="img" aria-label="Distanz Indoor Outdoor und Watt">Monatsdaten</canvas></div>
     </div>
 
     <div class="section-label">Herzfrequenzzonen</div>
@@ -217,9 +208,10 @@ let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='';
 
 function isIndoor(a){
   const n=(a.name||'').toLowerCase();
-  const t=(a.type_key||'').toLowerCase();
-  return n.includes('indoor')||n.includes('trainer')||n.includes('rolle')||t.includes('indoor')||
-    (a.elevation_m===0&&a.avg_hr>0&&a.distanz_km>0&&a.distanz_km<70&&!n.includes('hamburg')&&!n.includes('berlin')&&!n.includes('outdoor')&&!n.includes('rennrad')&&!n.includes('harz')&&!n.includes('spreewald'));
+  return n.includes('indoor')||n.includes('trainer')||n.includes('rolle')||
+    (a.elevation_m===0&&!n.includes('hamburg')&&!n.includes('berlin')&&!n.includes('harz')&&
+     !n.includes('spreewald')&&!n.includes('rennrad')&&!n.includes('outdoor')&&
+     !n.includes('zone2')&&!n.includes('zone 2'));
 }
 
 function selectSport(s){selectedSport=s;document.getElementById('btn-cycling').classList.toggle('active',s==='cycling');document.getElementById('btn-running').classList.toggle('active',s==='running');}
@@ -249,52 +241,29 @@ async function startLoad(){
       mfaRequired=true;show('login-screen');
       document.getElementById('mfa-box').style.display='block';
       document.getElementById('submit-btn').textContent='Code bestaetigen und laden';
-      document.getElementById('mfa-code').focus();
-      return;
+      document.getElementById('mfa-code').focus();return;
     }
     if(!res.ok||data.error){show('login-screen');errEl.textContent=data.error||'Fehler beim Laden.';errEl.style.display='block';return;}
-    buildDashboard(data.activities,selectedSport);
-    show('dashboard-screen');
+    buildDashboard(data.activities,selectedSport);show('dashboard-screen');
   }catch(e){clearInterval(interval);show('login-screen');errEl.textContent='Server nicht erreichbar.';errEl.style.display='block';}
 }
 
 async function generateAISummary(acts,sport){
   const byYear={};
-  acts.forEach(a=>{
-    const y=a.datum.slice(0,4);
-    if(!byYear[y])byYear[y]={km:0,speed:[],w:[],count:0};
-    byYear[y].km+=a.distanz_km;byYear[y].count++;
-    if(a.avg_speed_kmh>0)byYear[y].speed.push(a.avg_speed_kmh);
-    if(a.avg_power_w>0)byYear[y].w.push(a.avg_power_w);
-  });
+  acts.forEach(a=>{const y=a.datum.slice(0,4);if(!byYear[y])byYear[y]={km:0,speed:[],w:[],count:0};byYear[y].km+=a.distanz_km;byYear[y].count++;if(a.avg_speed_kmh>0)byYear[y].speed.push(a.avg_speed_kmh);if(a.avg_power_w>0)byYear[y].w.push(a.avg_power_w);});
   const totalKm=Math.round(acts.reduce((s,a)=>s+a.distanz_km,0));
   const totalH=Math.round(acts.reduce((s,a)=>s+a.dauer_min,0)/60);
   const totalKcal=Math.round(acts.reduce((s,a)=>s+a.kalorien,0));
   const maxAct=[...acts].sort((a,b)=>b.distanz_km-a.distanz_km)[0];
   const sportName=sport==='cycling'?'Rennrad':'Laufen';
-  const yearSummary=Object.entries(byYear).sort().map(([y,d])=>{
-    const avgSpeed=d.speed.length?(d.speed.reduce((a,b)=>a+b)/d.speed.length).toFixed(1):'n/a';
-    const avgW=d.w.length?Math.round(d.w.reduce((a,b)=>a+b)/d.w.length):'n/a';
-    return y+': '+d.count+' Einheiten, '+Math.round(d.km)+' km, Avg '+avgSpeed+' km/h, Avg '+avgW+' W';
-  }).join('\n');
+  const yearSummary=Object.entries(byYear).sort().map(([y,d])=>{const avgSpeed=d.speed.length?(d.speed.reduce((a,b)=>a+b)/d.speed.length).toFixed(1):'n/a';const avgW=d.w.length?Math.round(d.w.reduce((a,b)=>a+b)/d.w.length):'n/a';return y+': '+d.count+' Einheiten, '+Math.round(d.km)+' km, Avg '+avgSpeed+' km/h, Avg '+avgW+' W';}).join('\n');
   const prompt='Du bist ein persoenlicher Trainingsanalyst. Analysiere diese '+sportName+'-Daten und schreibe eine motivierende, persoenliche Zusammenfassung auf Deutsch. Nutze die echten Zahlen. Maximal 120 Woerter. Verwende Emojis. Struktur: Gesamtbilanz, Jahresentwicklung mit Trend, ein besonderes Highlight.\n\nDaten:\n- Gesamt: '+totalKm.toLocaleString('de')+' km in '+totalH+' Stunden, '+acts.length+' Aktivitaeten, '+totalKcal.toLocaleString('de')+' kcal\n- Laengste Einheit: '+maxAct.distanz_km.toFixed(1)+' km am '+maxAct.datum+'\n- Pro Jahr:\n'+yearSummary;
   try{
     const res=await fetch(BACKEND+'/api/ai_summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_password:savedAppPw,prompt})});
     const data=await res.json();
-    if(data.text){
-      document.getElementById('ai-text').innerHTML=data.text.replace(/\n/g,'<br>');
-      document.getElementById('ai-badge').textContent='fertig';
-      document.getElementById('ai-badge').style.color='var(--green)';
-      document.getElementById('ai-badge').style.borderColor='rgba(16,185,129,0.3)';
-      document.getElementById('ai-badge').style.background='rgba(16,185,129,0.1)';
-    }else{
-      document.getElementById('ai-text').textContent='KI-Analyse nicht verfuegbar.';
-      document.getElementById('ai-badge').textContent='fehler';
-    }
-  }catch(e){
-    document.getElementById('ai-text').textContent='KI-Analyse nicht verfuegbar.';
-    document.getElementById('ai-badge').textContent='fehler';
-  }
+    if(data.text){document.getElementById('ai-text').innerHTML=data.text.replace(/\n/g,'<br>');document.getElementById('ai-badge').textContent='fertig';document.getElementById('ai-badge').style.color='var(--green)';document.getElementById('ai-badge').style.borderColor='rgba(16,185,129,0.3)';document.getElementById('ai-badge').style.background='rgba(16,185,129,0.1)';}
+    else{document.getElementById('ai-text').textContent='KI-Analyse nicht verfuegbar.';document.getElementById('ai-badge').textContent='fehler';}
+  }catch(e){document.getElementById('ai-text').textContent='KI-Analyse nicht verfuegbar.';document.getElementById('ai-badge').textContent='fehler';}
 }
 
 function buildDashboard(acts,sport){
@@ -342,23 +311,30 @@ function buildDashboard(acts,sport){
   const byMonth={};
   valid.forEach(a=>{
     const m=a.datum.slice(0,7);
-    if(!byMonth[m])byMonth[m]={km:0,w:[],indoor:0,outdoor:0};
-    byMonth[m].km+=a.distanz_km;
+    if(!byMonth[m])byMonth[m]={kmIndoor:0,kmOutdoor:0,w:[]};
+    if(isIndoor(a))byMonth[m].kmIndoor+=a.distanz_km;else byMonth[m].kmOutdoor+=a.distanz_km;
     if(a.avg_power_w>0)byMonth[m].w.push(a.avg_power_w);
-    if(isIndoor(a))byMonth[m].indoor++;else byMonth[m].outdoor++;
   });
-  const months=Object.keys(byMonth).sort().slice(-13);
-  const kmData=months.map(m=>Math.round(byMonth[m].km));
+  const months=Object.keys(byMonth).sort().slice(-24);
+  const kmIndoorData=months.map(m=>Math.round(byMonth[m].kmIndoor));
+  const kmOutdoorData=months.map(m=>Math.round(byMonth[m].kmOutdoor));
   const wData=months.map(m=>byMonth[m].w.length?Math.round(byMonth[m].w.reduce((a,b)=>a+b)/byMonth[m].w.length):null);
-  const indoorData=months.map(m=>byMonth[m].indoor);
-  const outdoorData=months.map(m=>byMonth[m].outdoor);
   const ml=months.map(m=>{const p=m.split('-');return['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+p[1]-1]+' '+p[0].slice(2);});
 
-  if(charts.inout)charts.inout.destroy();
-  charts.inout=new Chart(document.getElementById('c_inout'),{type:'bar',data:{labels:ml,datasets:[{label:'Indoor',data:indoorData,backgroundColor:'rgba(79,124,255,0.7)',stack:'s'},{label:'Outdoor',data:outdoorData,backgroundColor:'rgba(16,185,129,0.7)',stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,ticks:{color:'#5a6072',font:{size:11},maxRotation:45,autoSkip:false},grid:{display:false},border:{display:false}},y:{stacked:true,ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
-
   if(charts.monat)charts.monat.destroy();
-  charts.monat=new Chart(document.getElementById('c_monat'),{type:'bar',data:{labels:ml,datasets:[{label:'km',data:kmData,backgroundColor:'rgba(79,124,255,0.7)',yAxisID:'y'},{label:'W',data:wData,type:'line',borderColor:'#10b981',backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:'#10b981',yAxisID:'y2',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:11},maxRotation:45,autoSkip:false},grid:{display:false},border:{display:false}},y:{position:'left',ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}},y2:{position:'right',ticks:{color:'#10b981',font:{size:11}},grid:{display:false},border:{display:false},min:0}}}});
+  charts.monat=new Chart(document.getElementById('c_monat'),{
+    type:'bar',
+    data:{labels:ml,datasets:[
+      {label:'Indoor km',data:kmIndoorData,backgroundColor:'rgba(79,124,255,0.75)',stack:'km',yAxisID:'y'},
+      {label:'Outdoor km',data:kmOutdoorData,backgroundColor:'rgba(16,185,129,0.75)',stack:'km',yAxisID:'y'},
+      {label:'Ø Watt',data:wData,type:'line',borderColor:'#f472b6',backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:'#f472b6',yAxisID:'y2',spanGaps:true,borderDash:[]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+      x:{stacked:true,ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},
+      y:{stacked:true,position:'left',ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}},
+      y2:{position:'right',ticks:{color:'#f472b6',font:{size:11}},grid:{display:false},border:{display:false},min:0}
+    }}
+  });
 
   const z1=wH.filter(a=>a.avg_hr<124).length,z2=wH.filter(a=>a.avg_hr>=124&&a.avg_hr<145).length,z3=wH.filter(a=>a.avg_hr>=145&&a.avg_hr<163).length,z4=wH.filter(a=>a.avg_hr>=163&&a.avg_hr<178).length,z5=wH.filter(a=>a.avg_hr>=178).length,tot=wH.length||1;
   document.getElementById('zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter 124 bpm',count:z1,color:'#10b981'},{label:'Z2 Ausdauer\n124-144 bpm',count:z2,color:'#84cc16'},{label:'Z3 Tempo\n145-162 bpm',count:z3,color:'#f59e0b'},{label:'Z4 Schwelle\n163-177 bpm',count:z4,color:'#f97316'},{label:'Z5 VO2max\nUeber 177 bpm',count:z5,color:'#ef4444'}].map(z=>{const pct=Math.round(z.count/tot*100),lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+z.count+' Einh.</div></div>';}).join('');
@@ -367,8 +343,11 @@ function buildDashboard(acts,sport){
   if(charts.dauer)charts.dauer.destroy();
   charts.dauer=new Chart(document.getElementById('c_dauer'),{type:'doughnut',data:{labels:['Unter 45 min','45-75 min','75-120 min','Ueber 120 min'],datasets:[{data:[d1,d2,d3,d4],backgroundColor:['#4f7cff','#10b981','#f59e0b','#f472b6'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'right',labels:{color:'#8892a4',font:{size:11},boxWidth:10,padding:8}}}}});
 
+  const allMonths=Object.keys(byMonth).sort();
+  const allW=allMonths.map(m=>byMonth[m].w.length?Math.round(byMonth[m].w.reduce((a,b)=>a+b)/byMonth[m].w.length):null);
+  const allMl=allMonths.map(m=>{const p=m.split('-');return['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+p[1]-1]+' '+p[0].slice(2);});
   if(charts.trend)charts.trend.destroy();
-  charts.trend=new Chart(document.getElementById('c_trend'),{type:'line',data:{labels:ml,datasets:[{label:'W',data:wData,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',tension:0.4,fill:true,pointRadius:2,pointBackgroundColor:'#8b5cf6',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:11},maxRotation:45,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
+  charts.trend=new Chart(document.getElementById('c_trend'),{type:'line',data:{labels:allMl,datasets:[{label:'W',data:allW,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',tension:0.4,fill:true,pointRadius:2,pointBackgroundColor:'#8b5cf6',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
 
   const top10=[...valid].sort((a,b)=>b.distanz_km-a.distanz_km).slice(0,10);
   document.getElementById('top-table').innerHTML=top10.map((a,i)=>{const ci=a.distanz_km>100?0:a.distanz_km>70?1:2;const colors=['rgba(239,68,68,0.15)','rgba(245,158,11,0.15)','rgba(16,185,129,0.15)'],tc=['#ef4444','#f59e0b','#10b981'];return'<tr><td style="color:var(--muted);font-family:DM Mono,monospace;font-size:11px">'+String(i+1).padStart(2,'0')+'</td><td style="font-family:DM Mono,monospace;font-size:11px">'+a.datum+'</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+a.name+'</td><td><span class="badge" style="background:'+colors[ci]+';color:'+tc[ci]+'">'+a.distanz_km.toFixed(1)+' km</span></td><td>'+Math.round(a.dauer_min)+' min</td><td>'+(a.avg_power_w>0?Math.round(a.avg_power_w)+' W':'--')+'</td><td>'+(a.avg_hr>0?Math.round(a.avg_hr)+' bpm':'--')+'</td></tr>';}).join('');
