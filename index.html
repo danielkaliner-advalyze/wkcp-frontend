@@ -39,6 +39,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .topbar-logo{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;letter-spacing:0.12em;}
 .topbar-right{display:flex;align-items:center;gap:12px;}
 .topbar-sport{font-family:'DM Mono',monospace;font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--muted2);}
+.mode-toggle{display:flex;gap:0;border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
+.mode-btn{padding:5px 14px;font-size:11px;font-family:'DM Mono',monospace;background:none;border:none;color:var(--muted2);cursor:pointer;transition:all 0.2s;letter-spacing:0.06em;}
+.mode-btn.active{background:var(--accent);color:white;}
 .logout-btn{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;}
 .main{padding:1.5rem 2rem;max-width:1100px;margin:0 auto;}
 .section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:0.75rem;margin-top:2rem;display:flex;align-items:center;gap:8px;}
@@ -74,6 +77,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .ftp-input{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-size:14px;font-family:'DM Mono',monospace;width:80px;outline:none;text-align:center;}
 .ftp-btn{padding:6px 14px;background:var(--accent);border:none;border-radius:6px;color:white;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;}
 .ftp-hint{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.elite-banner{background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(239,68,68,0.06));border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;}
+.elite-icon{font-size:24px;}
+.elite-text{flex:1;}
+.elite-title{font-size:13px;font-weight:600;color:var(--amber);font-family:'DM Mono',monospace;letter-spacing:0.06em;}
+.elite-sub{font-size:12px;color:var(--muted2);margin-top:2px;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:0.07em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;}
 td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,0.03);}
@@ -143,98 +151,131 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     <div class="topbar-logo">Redpulse</div>
     <div class="topbar-right">
       <div class="topbar-sport" id="sport-badge">Rennrad</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-basic" onclick="setMode('basic')">Basic</button>
+        <button class="mode-btn" id="btn-elite" onclick="setMode('elite')">Elite</button>
+      </div>
       <button class="logout-btn" onclick="logout()">Abmelden</button>
     </div>
   </div>
-  <div class="main">
 
-    <div class="section-label" style="margin-top:0">KI-Analyse</div>
-    <div class="ai-card">
-      <div class="ai-card-header">
-        <div class="ai-card-title">Deine persoenliche Auswertung</div>
-        <div class="ai-badge" id="ai-badge">wird generiert...</div>
+  <!-- BASIC DASHBOARD -->
+  <div id="basic-view">
+    <div class="main">
+      <div class="section-label" style="margin-top:0">KI-Analyse</div>
+      <div class="ai-card">
+        <div class="ai-card-header">
+          <div class="ai-card-title">Deine persoenliche Auswertung</div>
+          <div class="ai-badge" id="ai-badge">wird generiert...</div>
+        </div>
+        <div class="ai-text" id="ai-text">
+          <div class="ai-loading"><div class="ai-spinner"></div><span>Analysiere deine Trainingsdaten...</span></div>
+        </div>
       </div>
-      <div class="ai-text" id="ai-text">
-        <div class="ai-loading"><div class="ai-spinner"></div><span>Analysiere deine Trainingsdaten...</span></div>
+
+      <div class="section-label">Gesamtuebersicht</div>
+      <div class="metrics-grid" id="metrics-grid"></div>
+
+      <div class="section-label">Indoor vs. Outdoor</div>
+      <div class="compare-grid" id="compare-cards"></div>
+
+      <div class="section-label">Distanz — letzte 24 Monate</div>
+      <div class="chart-card">
+        <div class="chart-title">Distanz pro Monat</div>
+        <div class="chart-sub">Indoor und Outdoor aufgeteilt · letzte 24 Monate</div>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>Indoor km</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Outdoor km</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#f472b6;border-radius:50%"></span>Ø Watt</div>
+        </div>
+        <div class="cw" style="height:260px"><canvas id="c_monat"></canvas></div>
       </div>
-    </div>
 
-    <div class="section-label">Gesamtuebersicht</div>
-    <div class="metrics-grid" id="metrics-grid"></div>
-
-    <div class="section-label">Indoor vs. Outdoor</div>
-    <div class="compare-grid" id="compare-cards"></div>
-
-    <div class="section-label">Distanz — letzte 24 Monate</div>
-    <div class="chart-card">
-      <div class="chart-title">Distanz pro Monat</div>
-      <div class="chart-sub">Indoor und Outdoor aufgeteilt · letzte 24 Monate</div>
-      <div class="legend">
-        <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>Indoor km</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Outdoor km</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#f472b6;border-radius:50%"></span>Ø Watt</div>
+      <div class="section-label">Trainingsstruktur</div>
+      <div class="grid-2">
+        <div class="chart-card" style="margin-bottom:0">
+          <div class="chart-title">Verteilung nach Dauer</div>
+          <div class="chart-sub">Anteil der Einheiten</div>
+          <div class="cw" style="height:200px"><canvas id="c_dauer"></canvas></div>
+        </div>
+        <div class="chart-card" style="margin-bottom:0">
+          <div class="chart-title">Leistungstrend</div>
+          <div class="chart-sub">Watt pro Monat</div>
+          <div class="cw" style="height:200px"><canvas id="c_trend"></canvas></div>
+        </div>
       </div>
-      <div class="cw" style="height:260px"><canvas id="c_monat"></canvas></div>
-    </div>
 
-    <div class="section-label">VO2max Entwicklung</div>
-    <div class="chart-card">
-      <div class="chart-title">VO2max Verlauf</div>
-      <div class="chart-sub" id="vo2max-sub">Wird geladen...</div>
-      <div class="cw" style="height:200px"><canvas id="c_vo2max"></canvas></div>
-    </div>
-
-    <div class="section-label">Herzfrequenzzonen</div>
-    <div class="chart-card">
-      <div class="chart-title">HF-Zonenverteilung</div>
-      <div class="chart-sub">Alle Einheiten mit HF-Daten</div>
-      <div id="hf-zone-bars" style="margin-top:1rem"></div>
-    </div>
-
-    <div class="section-label">Wattzonen</div>
-    <div class="chart-card">
-      <div class="chart-title">Watt-Zonenverteilung</div>
-      <div class="chart-sub" id="watt-zone-sub">Basierend auf deinem FTP</div>
-      <div class="ftp-row">
-        <span class="ftp-label">FTP:</span>
-        <input type="number" class="ftp-input" id="ftp-dashboard" placeholder="220" min="50" max="600">
-        <span class="ftp-label">W</span>
-        <button class="ftp-btn" onclick="updateWattZones()">Berechnen</button>
-        <span class="ftp-hint" id="ftp-hint"></span>
+      <div class="section-label">Top Aktivitaeten</div>
+      <div class="chart-card">
+        <div class="chart-title">Die 10 laengsten Ausfahrten</div>
+        <div class="chart-sub">Sortiert nach Distanz</div>
+        <table style="margin-top:0.75rem">
+          <thead><tr><th>#</th><th>Datum</th><th>Name</th><th>Distanz</th><th>Dauer</th><th>W</th><th>HF</th></tr></thead>
+          <tbody id="top-table"></tbody>
+        </table>
       </div>
-      <div id="watt-zone-bars" style="margin-top:0.5rem"></div>
-    </div>
-
-    <div class="section-label">Trainingsstruktur</div>
-    <div class="grid-2">
-      <div class="chart-card" style="margin-bottom:0">
-        <div class="chart-title">Verteilung nach Dauer</div>
-        <div class="chart-sub">Anteil der Einheiten</div>
-        <div class="cw" style="height:200px"><canvas id="c_dauer"></canvas></div>
-      </div>
-      <div class="chart-card" style="margin-bottom:0">
-        <div class="chart-title">Leistungstrend</div>
-        <div class="chart-sub">Watt pro Monat (gesamt)</div>
-        <div class="cw" style="height:200px"><canvas id="c_trend"></canvas></div>
-      </div>
-    </div>
-
-    <div class="section-label">Top Aktivitaeten</div>
-    <div class="chart-card">
-      <div class="chart-title">Die 10 laengsten Ausfahrten</div>
-      <div class="chart-sub">Sortiert nach Distanz</div>
-      <table style="margin-top:0.75rem">
-        <thead><tr><th>#</th><th>Datum</th><th>Name</th><th>Distanz</th><th>Dauer</th><th>W</th><th>HF</th></tr></thead>
-        <tbody id="top-table"></tbody>
-      </table>
     </div>
   </div>
+
+  <!-- ELITE DASHBOARD -->
+  <div id="elite-view" style="display:none">
+    <div class="main">
+      <div class="section-label" style="margin-top:0">Elite Analyse</div>
+      <div class="elite-banner">
+        <div class="elite-icon">⚡</div>
+        <div class="elite-text">
+          <div class="elite-title">Elite Dashboard</div>
+          <div class="elite-sub">Tiefgehende Leistungsanalyse — VO2max, HF-Zonen und Wattzonen</div>
+        </div>
+      </div>
+
+      <div class="section-label">VO2max Entwicklung</div>
+      <div class="chart-card">
+        <div class="chart-title">VO2max Verlauf</div>
+        <div class="chart-sub" id="vo2max-sub">Wird geladen...</div>
+        <div class="cw" style="height:220px"><canvas id="c_vo2max"></canvas></div>
+      </div>
+
+      <div class="section-label">Herzfrequenzzonen</div>
+      <div class="chart-card">
+        <div class="chart-title">HF-Zonenverteilung</div>
+        <div class="chart-sub">Alle Einheiten mit HF-Daten</div>
+        <div id="hf-zone-bars" style="margin-top:1rem"></div>
+      </div>
+
+      <div class="section-label">Wattzonen</div>
+      <div class="chart-card">
+        <div class="chart-title">Watt-Zonenverteilung</div>
+        <div class="chart-sub" id="watt-zone-sub">Basierend auf deinem FTP</div>
+        <div class="ftp-row">
+          <span class="ftp-label">FTP:</span>
+          <input type="number" class="ftp-input" id="ftp-dashboard" placeholder="220" min="50" max="600">
+          <span class="ftp-label">W</span>
+          <button class="ftp-btn" onclick="updateWattZones()">Berechnen</button>
+          <span class="ftp-hint" id="ftp-hint"></span>
+        </div>
+        <div id="watt-zone-bars" style="margin-top:0.5rem"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">Redpulse Training Dashboard - Powered by Garmin Connect and Claude AI</div>
 </div>
 
 <script>
 const BACKEND='https://web-production-9e162.up.railway.app';
-let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='',savedEmail='',savedPw='',allActivities=[];
+let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='',savedEmail='',savedPw='',allActivities=[],currentMode='basic';
+
+function setMode(mode){
+  currentMode=mode;
+  document.getElementById('basic-view').style.display=mode==='basic'?'block':'none';
+  document.getElementById('elite-view').style.display=mode==='elite'?'block':'none';
+  document.getElementById('btn-basic').classList.toggle('active',mode==='basic');
+  document.getElementById('btn-elite').classList.toggle('active',mode==='elite');
+  if(mode==='elite'&&allActivities.length>0){
+    setTimeout(()=>{renderEliteCharts();},50);
+  }
+}
 
 function isIndoor(a){
   const n=(a.name||'').toLowerCase();
@@ -246,7 +287,7 @@ function isIndoor(a){
 
 function selectSport(s){selectedSport=s;document.getElementById('btn-cycling').classList.toggle('active',s==='cycling');document.getElementById('btn-running').classList.toggle('active',s==='running');}
 function show(id){['login-screen','loading-screen','dashboard-screen'].forEach(s=>{const el=document.getElementById(s);el.style.display=s===id?(s==='loading-screen'?'flex':'block'):'none';});}
-function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';savedEmail='';savedPw='';allActivities=[];document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';show('login-screen');}
+function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';savedEmail='';savedPw='';allActivities=[];document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';setMode('basic');show('login-screen');}
 
 function updateWattZones(){
   const ftp=parseInt(document.getElementById('ftp-dashboard').value)||0;
@@ -270,6 +311,15 @@ function updateWattZones(){
   }).join('');
 }
 
+function renderEliteCharts(){
+  const wH=allActivities.filter(a=>a.avg_hr>0);
+  const z1=wH.filter(a=>a.avg_hr<124).length,z2=wH.filter(a=>a.avg_hr>=124&&a.avg_hr<145).length,z3=wH.filter(a=>a.avg_hr>=145&&a.avg_hr<163).length,z4=wH.filter(a=>a.avg_hr>=163&&a.avg_hr<178).length,z5=wH.filter(a=>a.avg_hr>=178).length,tot=wH.length||1;
+  document.getElementById('hf-zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter 124 bpm',count:z1,color:'#10b981'},{label:'Z2 Ausdauer\n124-144 bpm',count:z2,color:'#84cc16'},{label:'Z3 Tempo\n145-162 bpm',count:z3,color:'#f59e0b'},{label:'Z4 Schwelle\n163-177 bpm',count:z4,color:'#f97316'},{label:'Z5 VO2max\nUeber 177 bpm',count:z5,color:'#ef4444'}].map(z=>{const pct=Math.round(z.count/tot*100),lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+z.count+' Einh.</div></div>';}).join('');
+  const ftpVal=document.getElementById('ftp-dashboard').value;
+  if(ftpVal)updateWattZones();
+  else document.getElementById('watt-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">FTP eingeben und Berechnen klicken.</p>';
+}
+
 async function loadVO2max(){
   try{
     const res=await fetch(BACKEND+'/api/vo2max',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_password:savedAppPw,email:savedEmail,password:savedPw})});
@@ -286,26 +336,14 @@ async function loadVO2max(){
       if(charts.vo2max)charts.vo2max.destroy();
       charts.vo2max=new Chart(document.getElementById('c_vo2max'),{
         type:'line',
-        data:{labels,datasets:[{
-          label:'VO2max',data:values,
-          borderColor:'#f59e0b',
-          backgroundColor:'rgba(245,158,11,0.08)',
-          tension:0.4,fill:true,
-          pointRadius:4,pointBackgroundColor:'#f59e0b',
-          pointBorderColor:'var(--bg)',pointBorderWidth:2
-        }]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-          x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},
-          y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false},min:Math.max(0,Math.min(...values)-5),max:Math.max(...values)+5}
-        }}
+        data:{labels,datasets:[{label:'VO2max',data:values,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',tension:0.4,fill:true,pointRadius:4,pointBackgroundColor:'#f59e0b',pointBorderColor:'var(--bg)',pointBorderWidth:2}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false},min:Math.max(0,Math.min(...values)-5),max:Math.max(...values)+5}}}
       });
-    } else {
+    }else{
       document.getElementById('vo2max-sub').textContent='Keine VO2max Daten verfuegbar';
       document.getElementById('c_vo2max').parentElement.innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace;padding:1rem 0">Garmin hat fuer diesen Account keine VO2max Daten gespeichert.</p>';
     }
-  }catch(e){
-    document.getElementById('vo2max-sub').textContent='VO2max konnte nicht geladen werden';
-  }
+  }catch(e){document.getElementById('vo2max-sub').textContent='VO2max konnte nicht geladen werden';}
 }
 
 async function startLoad(){
@@ -392,12 +430,6 @@ function buildDashboard(acts,sport,ftpLogin){
 
   if(charts.monat)charts.monat.destroy();
   charts.monat=new Chart(document.getElementById('c_monat'),{type:'bar',data:{labels:ml,datasets:[{label:'Indoor km',data:kmIndoorData,backgroundColor:'rgba(79,124,255,0.75)',stack:'km',yAxisID:'y'},{label:'Outdoor km',data:kmOutdoorData,backgroundColor:'rgba(16,185,129,0.75)',stack:'km',yAxisID:'y'},{label:'Watt',data:wData,type:'line',borderColor:'#f472b6',backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:'#f472b6',yAxisID:'y2',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},y:{stacked:true,position:'left',ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}},y2:{position:'right',ticks:{color:'#f472b6',font:{size:11}},grid:{display:false},border:{display:false},min:0}}}});
-
-  const z1=wH.filter(a=>a.avg_hr<124).length,z2=wH.filter(a=>a.avg_hr>=124&&a.avg_hr<145).length,z3=wH.filter(a=>a.avg_hr>=145&&a.avg_hr<163).length,z4=wH.filter(a=>a.avg_hr>=163&&a.avg_hr<178).length,z5=wH.filter(a=>a.avg_hr>=178).length,tot=wH.length||1;
-  document.getElementById('hf-zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter 124 bpm',count:z1,color:'#10b981'},{label:'Z2 Ausdauer\n124-144 bpm',count:z2,color:'#84cc16'},{label:'Z3 Tempo\n145-162 bpm',count:z3,color:'#f59e0b'},{label:'Z4 Schwelle\n163-177 bpm',count:z4,color:'#f97316'},{label:'Z5 VO2max\nUeber 177 bpm',count:z5,color:'#ef4444'}].map(z=>{const pct=Math.round(z.count/tot*100),lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+z.count+' Einh.</div></div>';}).join('');
-
-  if(ftpLogin)updateWattZones();
-  else document.getElementById('watt-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">FTP eingeben und Berechnen klicken.</p>';
 
   const d1=valid.filter(a=>a.dauer_min<45).length,d2=valid.filter(a=>a.dauer_min>=45&&a.dauer_min<=75).length,d3=valid.filter(a=>a.dauer_min>75&&a.dauer_min<=120).length,d4=valid.filter(a=>a.dauer_min>120).length;
   if(charts.dauer)charts.dauer.destroy();
