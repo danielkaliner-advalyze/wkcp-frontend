@@ -83,24 +83,35 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .calc-btn:hover{opacity:0.85;}
 .wpk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem;}
 .regen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem;}
-.regen-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-.regen-row:last-child{border-bottom:none;}
-.regen-label{font-size:12px;color:var(--muted2);}
-.regen-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
 .status-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-family:'DM Mono',monospace;font-weight:500;}
 .status-ok{background:rgba(16,185,129,0.15);color:#10b981;}
 .status-warn{background:rgba(245,158,11,0.15);color:#f59e0b;}
 .status-bad{background:rgba(239,68,68,0.15);color:#ef4444;}
 .month-regen-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .month-regen-label{width:60px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted2);flex-shrink:0;}
-.month-regen-bars{flex:1;display:flex;gap:3px;}
 .month-regen-bar{height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;font-family:'DM Mono',monospace;color:rgba(0,0,0,0.7);}
 .month-regen-stats{width:100px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);text-align:right;flex-shrink:0;}
+.power-curve-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem;}
+.power-curve-card{background:var(--surface);padding:1rem 1.25rem;text-align:center;}
+.power-curve-interval{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
+.power-curve-value{font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--text);}
+.power-curve-unit{font-size:11px;color:var(--muted2);margin-left:2px;}
+.ftp-estimated-card{background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(239,68,68,0.06));border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.ftp-est-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--amber);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;}
+.ftp-est-value{font-size:36px;font-weight:700;color:var(--amber);letter-spacing:-0.02em;line-height:1;}
+.ftp-est-unit{font-size:14px;color:var(--muted2);margin-left:4px;}
+.ftp-est-method{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px;}
+.ftp-est-info{flex:1;font-size:12px;color:var(--muted2);line-height:1.6;}
+.elite-loading{display:flex;gap:10px;align-items:center;padding:2rem;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;}
 .premium-banner{background:linear-gradient(135deg,rgba(79,124,255,0.08),rgba(139,92,246,0.06));border:1px solid rgba(79,124,255,0.2);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;}
-.premium-icon{font-size:24px;}
-.premium-text{flex:1;}
-.premium-title{font-size:13px;font-weight:600;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:0.06em;}
-.premium-sub{font-size:12px;color:var(--muted2);margin-top:2px;}
+.elite-banner{background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(239,68,68,0.06));border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;}
+.banner-icon{font-size:24px;}
+.banner-text{flex:1;}
+.banner-title{font-size:13px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:0.06em;}
+.banner-sub{font-size:12px;color:var(--muted2);margin-top:2px;}
+.days-toggle{display:flex;gap:6px;margin-bottom:1rem;}
+.days-btn{padding:5px 14px;font-size:11px;font-family:'DM Mono',monospace;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--muted2);cursor:pointer;transition:all 0.2s;}
+.days-btn.active{background:var(--accent);border-color:var(--accent);color:white;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:0.07em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;}
 td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,0.03);}
@@ -115,7 +126,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .ai-text{font-size:14px;line-height:1.9;color:var(--muted2);}
 .ai-loading{display:flex;gap:8px;align-items:center;color:var(--muted);}
 .ai-spinner{width:14px;height:14px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
-@media(max-width:600px){.main,.topbar{padding:1rem;}.grid-2,.compare-grid,.params-grid{grid-template-columns:1fr;}.metric-value{font-size:20px;}}
+@media(max-width:600px){.main,.topbar{padding:1rem;}.grid-2,.compare-grid,.params-grid{grid-template-columns:1fr;}.metric-value{font-size:20px;}.power-curve-grid{grid-template-columns:repeat(4,1fr);}}
 </style>
 </head>
 <body>
@@ -169,12 +180,13 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       <div class="mode-toggle">
         <button class="mode-btn active" id="btn-basic" onclick="setMode('basic')">Basic</button>
         <button class="mode-btn" id="btn-premium" onclick="setMode('premium')">Premium</button>
+        <button class="mode-btn" id="btn-elite" onclick="setMode('elite')">Elite</button>
       </div>
       <button class="logout-btn" onclick="logout()">Abmelden</button>
     </div>
   </div>
 
-  <!-- BASIC DASHBOARD -->
+  <!-- BASIC -->
   <div id="basic-view">
     <div class="main">
       <div class="section-label" style="margin-top:0">KI-Analyse</div>
@@ -227,97 +239,124 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     </div>
   </div>
 
-  <!-- PREMIUM DASHBOARD -->
+  <!-- PREMIUM -->
   <div id="premium-view" style="display:none">
     <div class="main">
       <div class="section-label" style="margin-top:0">Leistungsparameter</div>
       <div class="premium-banner">
-        <div class="premium-icon">⚡</div>
-        <div class="premium-text">
-          <div class="premium-title">Premium Dashboard</div>
-          <div class="premium-sub">Gib deine Werte ein und klicke Berechnen — alle Analysen werden sofort aktualisiert</div>
+        <div class="banner-icon">⚡</div>
+        <div class="banner-text">
+          <div class="banner-title" style="color:var(--accent)">Premium Dashboard</div>
+          <div class="banner-sub">Gib deine Werte ein und klicke Berechnen</div>
         </div>
       </div>
       <div class="params-grid">
         <div class="param-card">
           <span class="param-label">Max. Herzfrequenz</span>
-          <div class="param-row">
-            <input type="number" class="param-input" id="param-hfmax" placeholder="185" min="100" max="230">
-            <span class="param-unit">bpm</span>
-          </div>
+          <div class="param-row"><input type="number" class="param-input" id="param-hfmax" placeholder="185" min="100" max="230"><span class="param-unit">bpm</span></div>
         </div>
         <div class="param-card">
           <span class="param-label">FTP</span>
-          <div class="param-row">
-            <input type="number" class="param-input" id="param-ftp" placeholder="220" min="50" max="600">
-            <span class="param-unit">W</span>
-          </div>
+          <div class="param-row"><input type="number" class="param-input" id="param-ftp" placeholder="220" min="50" max="600"><span class="param-unit">W</span></div>
         </div>
         <div class="param-card">
           <span class="param-label">Koerpergewicht</span>
-          <div class="param-row">
-            <input type="number" class="param-input" id="param-weight" placeholder="75" min="40" max="150">
-            <span class="param-unit">kg</span>
-          </div>
+          <div class="param-row"><input type="number" class="param-input" id="param-weight" placeholder="75" min="40" max="150"><span class="param-unit">kg</span></div>
         </div>
       </div>
       <button class="calc-btn" onclick="calculatePremium()">Berechnen</button>
-
       <div id="premium-results" style="display:none">
-
-        <!-- WATT PRO KILO -->
         <div class="section-label">Watt pro Kilo</div>
         <div class="wpk-grid" id="wpk-grid"></div>
-
-        <!-- VO2MAX -->
         <div class="section-label">VO2max Entwicklung</div>
         <div class="chart-card">
           <div class="chart-title">VO2max Verlauf</div>
           <div class="chart-sub" id="vo2max-sub">Wird geladen...</div>
           <div class="cw" style="height:220px"><canvas id="c_vo2max"></canvas></div>
         </div>
-
-        <!-- HF ZONEN -->
         <div class="section-label">Herzfrequenzzonen</div>
         <div class="chart-card">
           <div class="chart-title">HF-Zonenverteilung</div>
           <div class="chart-sub" id="hf-zone-sub">Basierend auf Max-HF</div>
           <div id="hf-zone-bars" style="margin-top:1rem"></div>
         </div>
-
-        <!-- WATT ZONEN -->
         <div class="section-label">Wattzonen</div>
         <div class="chart-card">
           <div class="chart-title">Watt-Zonenverteilung</div>
           <div class="chart-sub" id="watt-zone-sub">Basierend auf FTP</div>
           <div id="watt-zone-bars" style="margin-top:1rem"></div>
         </div>
-
-        <!-- REGENERATION -->
         <div class="section-label">Regeneration & Belastung</div>
         <div class="regen-grid" id="regen-summary"></div>
-
         <div class="chart-card" style="margin-top:1rem">
           <div class="chart-title">Ruhezeiten-Analyse pro Monat</div>
           <div class="chart-sub">Optimal = 1-2 Ruhetage zwischen Einheiten</div>
           <div id="regen-month-bars" style="margin-top:1rem"></div>
         </div>
-
         <div class="chart-card">
           <div class="chart-title">Akute vs. Chronische Belastung (ATL/CTL)</div>
           <div class="chart-sub">Ratio ueber 1.3 = erhoehtes Ueberlastungsrisiko</div>
           <div class="legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>CTL (Fitness, 42 Tage)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>ATL (Muedigkeit, 7 Tage)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#10b981;border-radius:50%"></span>Form (CTL-ATL)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#4f7cff"></span>CTL (Fitness)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>ATL (Muedigkeit)</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#10b981;border-radius:50%"></span>Form</div>
           </div>
           <div class="cw" style="height:240px"><canvas id="c_atl"></canvas></div>
         </div>
+        <div class="chart-card">
+          <div class="chart-title">Wochenbelastung</div>
+          <div class="chart-sub">Letzte 24 Wochen in Stunden</div>
+          <div class="cw" style="height:200px"><canvas id="c_wochen"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELITE -->
+  <div id="elite-view" style="display:none">
+    <div class="main">
+      <div class="section-label" style="margin-top:0">Power Curve Analyse</div>
+      <div class="elite-banner">
+        <div class="banner-icon">🏆</div>
+        <div class="banner-text">
+          <div class="banner-title" style="color:var(--amber)">Elite Dashboard</div>
+          <div class="banner-sub">Beste Leistungswerte aus deinen FIT-Dateien — direkt aus dem Powermeter</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;margin-bottom:8px;">ZEITRAUM</div>
+        <div class="days-toggle">
+          <button class="days-btn active" id="days-30" onclick="loadElite(30)">30 Tage</button>
+          <button class="days-btn" id="days-90" onclick="loadElite(90)">90 Tage</button>
+          <button class="days-btn" id="days-180" onclick="loadElite(180)">180 Tage</button>
+        </div>
+      </div>
+
+      <div id="elite-loading" class="elite-loading">
+        <div class="spinner" style="width:20px;height:20px;border-width:2px"></div>
+        <span>Lade FIT-Dateien und berechne Power Curve... Das dauert 1-2 Minuten.</span>
+      </div>
+
+      <div id="elite-results" style="display:none">
+
+        <div class="section-label">Geschaetzter FTP</div>
+        <div class="ftp-estimated-card" id="ftp-est-card"></div>
+
+        <div class="section-label">Power Curve — Beste Leistung</div>
+        <div class="power-curve-grid" id="power-curve-grid"></div>
 
         <div class="chart-card">
-          <div class="chart-title">Wochenbelastung — Trainingsstunden</div>
-          <div class="chart-sub">Letzte 24 Wochen</div>
-          <div class="cw" style="height:200px"><canvas id="c_wochen"></canvas></div>
+          <div class="chart-title">Power Curve Visualisierung</div>
+          <div class="chart-sub" id="pc-chart-sub">Beste Durchschnittsleistung pro Zeitintervall</div>
+          <div class="cw" style="height:280px"><canvas id="c_power_curve"></canvas></div>
+        </div>
+
+        <div class="section-label">Einordnung deiner Leistung</div>
+        <div class="chart-card">
+          <div class="chart-title">W/kg Vergleich nach Intervall</div>
+          <div class="chart-sub" id="wpkg-sub">Vergleich mit Referenzwerten (75kg Beispiel — Gewicht im Premium Board eingeben)</div>
+          <div id="wpkg-comparison"></div>
         </div>
 
       </div>
@@ -329,13 +368,14 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 <script>
 const BACKEND='https://web-production-9e162.up.railway.app';
-let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='',savedEmail='',savedPw='',allActivities=[];
+let selectedSport='cycling',charts={},mfaRequired=false,savedAppPw='',savedEmail='',savedPw='',allActivities=[],eliteLoaded=false,currentEliteDays=30;
 
 function setMode(mode){
-  document.getElementById('basic-view').style.display=mode==='basic'?'block':'none';
-  document.getElementById('premium-view').style.display=mode==='premium'?'block':'none';
-  document.getElementById('btn-basic').classList.toggle('active',mode==='basic');
-  document.getElementById('btn-premium').classList.toggle('active',mode==='premium');
+  ['basic','premium','elite'].forEach(m=>{
+    document.getElementById(m+'-view').style.display=m===mode?'block':'none';
+    document.getElementById('btn-'+m).classList.toggle('active',m===mode);
+  });
+  if(mode==='elite'&&!eliteLoaded){loadElite(30);}
 }
 
 function isIndoor(a){
@@ -348,7 +388,92 @@ function isIndoor(a){
 
 function selectSport(s){selectedSport=s;document.getElementById('btn-cycling').classList.toggle('active',s==='cycling');document.getElementById('btn-running').classList.toggle('active',s==='running');}
 function show(id){['login-screen','loading-screen','dashboard-screen'].forEach(s=>{const el=document.getElementById(s);el.style.display=s===id?(s==='loading-screen'?'flex':'block'):'none';});}
-function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';savedEmail='';savedPw='';allActivities=[];document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';setMode('basic');show('login-screen');}
+function logout(){Object.values(charts).forEach(c=>c.destroy());charts={};mfaRequired=false;savedAppPw='';savedEmail='';savedPw='';allActivities=[];eliteLoaded=false;document.getElementById('mfa-box').style.display='none';document.getElementById('mfa-code').value='';document.getElementById('submit-btn').textContent='Dashboard laden';setMode('basic');show('login-screen');}
+
+async function loadElite(days){
+  currentEliteDays=days;
+  [30,90,180].forEach(d=>{document.getElementById('days-'+d).classList.toggle('active',d===days);});
+  document.getElementById('elite-loading').style.display='flex';
+  document.getElementById('elite-results').style.display='none';
+  try{
+    const res=await fetch(BACKEND+'/api/power_curve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_password:savedAppPw,email:savedEmail,password:savedPw,days})});
+    const data=await res.json();
+    if(data.error){document.getElementById('elite-loading').innerHTML='<span style="color:var(--red)">Fehler: '+data.error+'</span>';return;}
+    eliteLoaded=true;
+    renderElite(data);
+  }catch(e){
+    document.getElementById('elite-loading').innerHTML='<span style="color:var(--red)">Konnte Power Curve nicht laden.</span>';
+  }
+}
+
+function renderElite(data){
+  document.getElementById('elite-loading').style.display='none';
+  document.getElementById('elite-results').style.display='block';
+
+  // FTP Card
+  const ftpEl=document.getElementById('ftp-est-card');
+  if(data.ftp_estimated>0){
+    ftpEl.innerHTML='<div><div class="ftp-est-label">Geschaetzter FTP</div><div><span class="ftp-est-value">'+data.ftp_estimated+'</span><span class="ftp-est-unit">Watt</span></div><div class="ftp-est-method">Methode: '+data.ftp_method+'</div></div><div class="ftp-est-info">Basierend auf deiner besten Leistung aus '+data.activities_analyzed+' Aktivitaeten der letzten '+data.days+' Tage. Trage diesen Wert im Premium Board ein fuer Zonen-Berechnungen.</div>';
+  }else{
+    ftpEl.innerHTML='<div class="ftp-est-info">Nicht genug Daten fuer FTP-Schaetzung. Fahre laengere Einheiten mit Powermeter.</div>';
+  }
+
+  // Power Curve Grid
+  const intervals=[
+    {key:'1s',label:'1 Sek'},
+    {key:'5s',label:'5 Sek'},
+    {key:'10s',label:'10 Sek'},
+    {key:'1min',label:'1 Min'},
+    {key:'2min',label:'2 Min'},
+    {key:'3min',label:'3 Min'},
+    {key:'5min',label:'5 Min'},
+    {key:'20min',label:'20 Min'},
+  ];
+  document.getElementById('power-curve-grid').innerHTML=intervals.map(iv=>{
+    const val=data[iv.key]||0;
+    const color=iv.key==='1s'?'var(--red)':iv.key==='5s'||iv.key==='10s'?'var(--amber)':iv.key==='1min'||iv.key==='2min'?'var(--purple)':'var(--accent)';
+    return'<div class="power-curve-card"><div class="power-curve-interval">'+iv.label+'</div><div class="power-curve-value" style="color:'+color+'">'+(val>0?val:'--')+'<span class="power-curve-unit">W</span></div></div>';
+  }).join('');
+
+  // Power Curve Chart
+  const labels=['1s','5s','10s','1min','2min','3min','5min','20min'];
+  const values=[data['1s'],data['5s'],data['10s'],data['1min'],data['2min'],data['3min'],data['5min'],data['20min']];
+  document.getElementById('pc-chart-sub').textContent='Beste Durchschnittsleistung pro Zeitintervall · '+data.activities_analyzed+' Aktivitaeten analysiert · '+data.days+' Tage';
+  if(charts.power_curve)charts.power_curve.destroy();
+  charts.power_curve=new Chart(document.getElementById('c_power_curve'),{
+    type:'line',
+    data:{labels,datasets:[{
+      label:'Watt',data:values,
+      borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',
+      tension:0.3,fill:true,
+      pointRadius:6,pointBackgroundColor:'#f59e0b',
+      pointBorderColor:'var(--bg)',pointBorderWidth:2
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y+' W'}}},scales:{x:{ticks:{color:'#5a6072',font:{size:12}},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11},callback:v=>v+' W'},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}
+  });
+
+  // W/kg Vergleich
+  const weight=parseFloat(document.getElementById('param-weight')?.value)||75;
+  const ftp=data.ftp_estimated||data['20min']||data['5min'];
+  if(ftp>0&&weight>0){
+    document.getElementById('wpkg-sub').textContent='Basierend auf '+weight+' kg Koerpergewicht';
+    const wpkg=(ftp/weight).toFixed(2);
+    const refs=[
+      {cat:'World Tour Pro',val:6.4,color:'#ef4444'},
+      {cat:'Elite Amateur',val:5.0,color:'#f97316'},
+      {cat:'Cat 1-2',val:4.5,color:'#f59e0b'},
+      {cat:'Cat 3-4',val:3.5,color:'#84cc16'},
+      {cat:'Sportler',val:2.5,color:'#10b981'},
+    ];
+    const myBar=Math.min(parseFloat(wpkg)/7*100,100);
+    document.getElementById('wpkg-comparison').innerHTML=
+      '<div style="margin-bottom:1rem"><div style="font-size:12px;color:var(--muted2);margin-bottom:6px">Dein FTP W/kg: <strong style="color:var(--amber);font-size:16px">'+wpkg+' W/kg</strong></div>'+
+      '<div style="background:rgba(255,255,255,0.04);border-radius:6px;height:24px;overflow:hidden;margin-bottom:1rem"><div style="width:'+myBar+'%;height:100%;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444);border-radius:6px;display:flex;align-items:center;padding-left:10px"><span style="font-size:11px;font-weight:600;color:white;font-family:DM Mono,monospace">'+wpkg+' W/kg</span></div></div></div>'+
+      refs.map(r=>{const pct=Math.min(r.val/7*100,100);return'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:120px;font-size:11px;color:var(--muted2);font-family:DM Mono,monospace;flex-shrink:0">'+r.cat+'</div><div style="flex:1;background:rgba(255,255,255,0.04);border-radius:4px;height:16px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+r.color+';opacity:0.4;border-radius:4px"></div></div><div style="width:50px;font-size:11px;font-family:DM Mono,monospace;color:var(--muted);text-align:right">'+r.val+' W/kg</div></div>';}).join('');
+  }else{
+    document.getElementById('wpkg-comparison').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">Koerpergewicht im Premium Board eingeben fuer W/kg Vergleich.</p>';
+  }
+}
 
 function calculatePremium(){
   const hfmax=parseInt(document.getElementById('param-hfmax').value)||0;
@@ -356,7 +481,6 @@ function calculatePremium(){
   const weight=parseFloat(document.getElementById('param-weight').value)||0;
   document.getElementById('premium-results').style.display='block';
 
-  // W/KG
   if(ftp>0&&weight>0){
     const wpk=(ftp/weight).toFixed(2);
     const avgWArr=allActivities.filter(a=>a.avg_power_w>0);
@@ -370,131 +494,49 @@ function calculatePremium(){
     document.getElementById('wpk-grid').innerHTML='<div class="metric-card" style="grid-column:1/-1"><div style="color:var(--muted);font-size:13px;padding-top:4px">FTP und Koerpergewicht eingeben.</div></div>';
   }
 
-  // HF ZONEN
   if(hfmax>0){
     const z1max=Math.round(hfmax*0.60),z2max=Math.round(hfmax*0.70),z3max=Math.round(hfmax*0.80),z4max=Math.round(hfmax*0.90);
     const wH=allActivities.filter(a=>a.avg_hr>0);const tot=wH.length||1;
     document.getElementById('hf-zone-sub').textContent='Basierend auf Max-HF: '+hfmax+' bpm';
     document.getElementById('hf-zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter '+z1max+' bpm',min:0,max:z1max,color:'#10b981'},{label:'Z2 Ausdauer\n'+z1max+'-'+z2max+' bpm',min:z1max,max:z2max,color:'#84cc16'},{label:'Z3 Tempo\n'+z2max+'-'+z3max+' bpm',min:z2max,max:z3max,color:'#f59e0b'},{label:'Z4 Schwelle\n'+z3max+'-'+z4max+' bpm',min:z3max,max:z4max,color:'#f97316'},{label:'Z5 VO2max\nUeber '+z4max+' bpm',min:z4max,max:9999,color:'#ef4444'}].map(z=>{const count=wH.filter(a=>a.avg_hr>=z.min&&a.avg_hr<z.max).length;const pct=Math.round(count/tot*100);const lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+count+' Einh.</div></div>';}).join('');
-  }else{
-    document.getElementById('hf-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">Max. Herzfrequenz eingeben.</p>';
-  }
+  }else{document.getElementById('hf-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">Max. Herzfrequenz eingeben.</p>';}
 
-  // WATT ZONEN
   if(ftp>0){
     const withW=allActivities.filter(a=>a.avg_power_w>0);const tot=withW.length||1;
     document.getElementById('watt-zone-sub').textContent='Basierend auf FTP: '+ftp+' W';
     document.getElementById('watt-zone-bars').innerHTML=[{label:'Z1 Erholung\nUnter '+Math.round(ftp*0.55)+' W',min:0,max:ftp*0.55,color:'#10b981'},{label:'Z2 Ausdauer\n'+Math.round(ftp*0.55)+'-'+Math.round(ftp*0.75)+' W',min:ftp*0.55,max:ftp*0.75,color:'#84cc16'},{label:'Z3 Tempo\n'+Math.round(ftp*0.75)+'-'+Math.round(ftp*0.90)+' W',min:ftp*0.75,max:ftp*0.90,color:'#f59e0b'},{label:'Z4 Schwelle\n'+Math.round(ftp*0.90)+'-'+Math.round(ftp*1.05)+' W',min:ftp*0.90,max:ftp*1.05,color:'#f97316'},{label:'Z5 VO2max\nUeber '+Math.round(ftp*1.05)+' W',min:ftp*1.05,max:9999,color:'#ef4444'}].map(z=>{const count=withW.filter(a=>a.avg_power_w>=z.min&&a.avg_power_w<z.max).length;const pct=Math.round(count/tot*100);const lines=z.label.split('\n');return'<div class="zone-row"><div class="zone-label">'+lines[0]+'<br><span style="color:var(--muted)">'+lines[1]+'</span></div><div class="zone-track"><div class="zone-fill" style="width:'+pct+'%;background:'+z.color+'">'+(pct>8?pct+'%':'')+'</div></div><div class="zone-count">'+count+' Einh.</div></div>';}).join('');
-  }else{
-    document.getElementById('watt-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">FTP eingeben.</p>';
-  }
+  }else{document.getElementById('watt-zone-bars').innerHTML='<p style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace">FTP eingeben.</p>';}
 
-  // REGENERATION
   buildRegenAnalysis();
-
   if(charts.vo2max)setTimeout(()=>{charts.vo2max.resize();},100);
 }
 
 function buildRegenAnalysis(){
   const sorted=[...allActivities].sort((a,b)=>a.datum.localeCompare(b.datum));
   if(sorted.length<2){document.getElementById('regen-summary').innerHTML='<div class="metric-card" style="grid-column:1/-1"><div style="color:var(--muted);font-size:13px">Nicht genug Daten.</div></div>';return;}
-
-  // Ruhetage zwischen Einheiten
   const gaps=[];
-  for(let i=1;i<sorted.length;i++){
-    const d1=new Date(sorted[i-1].datum),d2=new Date(sorted[i].datum);
-    const diff=Math.round((d2-d1)/(1000*60*60*24));
-    if(diff>=0&&diff<=14)gaps.push(diff);
-  }
+  for(let i=1;i<sorted.length;i++){const d1=new Date(sorted[i-1].datum),d2=new Date(sorted[i].datum);const diff=Math.round((d2-d1)/(1000*60*60*24));if(diff>=0&&diff<=14)gaps.push(diff);}
   const avgGap=(gaps.reduce((a,b)=>a+b,0)/gaps.length).toFixed(1);
   const tooShort=gaps.filter(g=>g===0).length;
-  const optimal=gaps.filter(g=>g>=1&&g<=2).length;
-  const tooLong=gaps.filter(g=>g>4).length;
-  const gapStatus=avgGap<1?'bad':avgGap<=2.5?'ok':'warn';
-  const gapLabel=avgGap<1?'Zu wenig Pause':avgGap<=2.5?'Optimal':'Oft lange Pausen';
-
-  // ATL/CTL Berechnung
   const dayMap={};
-  sorted.forEach(a=>{
-    const d=a.datum;
-    if(!dayMap[d])dayMap[d]=0;
-    dayMap[d]+=a.dauer_min/60;
-  });
-  const allDates=[];
-  const start=new Date(sorted[0].datum);
-  const end=new Date(sorted[sorted.length-1].datum);
-  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-    allDates.push(d.toISOString().slice(0,10));
-  }
-  let atl=0,ctl=0;
-  const atlArr=[],ctlArr=[],formArr=[],dateArr=[];
-  allDates.forEach(d=>{
-    const load=dayMap[d]||0;
-    atl=atl+(load-atl)*(1-Math.exp(-1/7));
-    ctl=ctl+(load-ctl)*(1-Math.exp(-1/42));
-    atlArr.push(Math.round(atl*100)/100);
-    ctlArr.push(Math.round(ctl*100)/100);
-    formArr.push(Math.round((ctl-atl)*100)/100);
-    dateArr.push(d);
-  });
-  const last90=Math.max(0,dateArr.length-90);
-  const recentDates=dateArr.slice(last90);
-  const recentAtl=atlArr.slice(last90);
-  const recentCtl=ctlArr.slice(last90);
-  const recentForm=formArr.slice(last90);
-  const currentAtl=atlArr[atlArr.length-1];
-  const currentCtl=ctlArr[ctlArr.length-1];
-  const currentForm=formArr[formArr.length-1];
+  sorted.forEach(a=>{const d=a.datum;if(!dayMap[d])dayMap[d]=0;dayMap[d]+=a.dauer_min/60;});
+  const allDates=[];const start=new Date(sorted[0].datum);const end=new Date(sorted[sorted.length-1].datum);
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1))allDates.push(d.toISOString().slice(0,10));
+  let atl=0,ctl=0;const atlArr=[],ctlArr=[],formArr=[],dateArr=[];
+  allDates.forEach(d=>{const load=dayMap[d]||0;atl=atl+(load-atl)*(1-Math.exp(-1/7));ctl=ctl+(load-ctl)*(1-Math.exp(-1/42));atlArr.push(Math.round(atl*100)/100);ctlArr.push(Math.round(ctl*100)/100);formArr.push(Math.round((ctl-atl)*100)/100);dateArr.push(d);});
+  const last90=Math.max(0,dateArr.length-90);const recentDates=dateArr.slice(last90);const recentAtl=atlArr.slice(last90);const recentCtl=ctlArr.slice(last90);const recentForm=formArr.slice(last90);
+  const currentAtl=atlArr[atlArr.length-1];const currentCtl=ctlArr[ctlArr.length-1];const currentForm=formArr[formArr.length-1];
   const ratio=currentCtl>0?(currentAtl/currentCtl).toFixed(2):0;
-  const riskStatus=ratio>1.3?'bad':ratio>1.1?'warn':'ok';
-  const riskLabel=ratio>1.3?'Hohes Risiko':ratio>1.1?'Erhoehtes Risiko':'Niedrig';
-
-  document.getElementById('regen-summary').innerHTML=
-    '<div class="metric-card"><div class="metric-label">Ø Ruhetage</div><div class="metric-value">'+avgGap+'<span class="metric-unit"> Tage</span></div></div>'+
-    '<div class="metric-card"><div class="metric-label">Ruhe-Status</div><div class="metric-value" style="font-size:14px;padding-top:4px"><span class="status-pill status-'+gapStatus+'">'+gapLabel+'</span></div></div>'+
-    '<div class="metric-card"><div class="metric-label">Zu kurze Pausen</div><div class="metric-value">'+tooShort+'<span class="metric-unit"> mal</span></div></div>'+
-    '<div class="metric-card"><div class="metric-label">Ueberlastungsrisiko</div><div class="metric-value" style="font-size:14px;padding-top:4px"><span class="status-pill status-'+riskStatus+'">'+riskLabel+'</span></div></div>'+
-    '<div class="metric-card"><div class="metric-label">Fitness (CTL)</div><div class="metric-value">'+currentCtl.toFixed(1)+'<span class="metric-unit"> h</span></div></div>'+
-    '<div class="metric-card"><div class="metric-label">Form (CTL-ATL)</div><div class="metric-value" style="color:'+(currentForm>=0?'var(--green)':'var(--red)')+'">'+currentForm.toFixed(1)+'<span class="metric-unit"> h</span></div></div>';
-
-  // Monatsweise Ruhezeiten
-  const byMonth={};
-  sorted.forEach(a=>{const m=a.datum.slice(0,7);if(!byMonth[m])byMonth[m]=[];byMonth[m].push(a.datum);});
-  const months=Object.keys(byMonth).sort().slice(-12);
-  document.getElementById('regen-month-bars').innerHTML=months.map(m=>{
-    const dates=byMonth[m].sort();
-    if(dates.length<2)return'<div class="month-regen-row"><div class="month-regen-label">'+m.slice(0,7)+'</div><div class="month-regen-bars"><span style="color:var(--muted);font-size:11px">Zu wenig Daten</span></div></div>';
-    const monthGaps=[];
-    for(let i=1;i<dates.length;i++){const d=Math.round((new Date(dates[i])-new Date(dates[i-1]))/(1000*60*60*24));if(d<=10)monthGaps.push(d);}
-    const avgM=(monthGaps.reduce((a,b)=>a+b,0)/monthGaps.length).toFixed(1);
-    const tooS=monthGaps.filter(g=>g===0).length;
-    const opt=monthGaps.filter(g=>g>=1&&g<=2).length;
-    const tooL=monthGaps.filter(g=>g>3).length;
-    const total=monthGaps.length||1;
-    const pS=Math.round(tooS/total*100),pO=Math.round(opt/total*100),pL=Math.round(tooL/total*100);
-    const statusC=avgM<1?'var(--red)':avgM<=2.5?'var(--green)':'var(--amber)';
-    return'<div class="month-regen-row"><div class="month-regen-label">'+['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+m.slice(5,7)-1]+' '+m.slice(2,4)+'</div><div class="month-regen-bars" style="flex:1">'+(pS>0?'<div class="month-regen-bar" style="flex:'+pS+';background:rgba(239,68,68,0.7)">'+(pS>8?pS+'%':'')+'</div>':'')+(pO>0?'<div class="month-regen-bar" style="flex:'+pO+';background:rgba(16,185,129,0.7)">'+(pO>8?pO+'%':'')+'</div>':'')+(pL>0?'<div class="month-regen-bar" style="flex:'+pL+';background:rgba(245,158,11,0.5)">'+(pL>8?pL+'%':'')+'</div>':'')+'</div><div class="month-regen-stats" style="color:'+statusC+'">Ø '+avgM+' Tage</div></div>';
-  }).join('');
-
-  // ATL/CTL Chart
-  const lbls=recentDates.map((d,i)=>i%7===0?d.slice(5):'');
+  const riskStatus=ratio>1.3?'bad':ratio>1.1?'warn':'ok';const riskLabel=ratio>1.3?'Hohes Risiko':ratio>1.1?'Erhoehtes Risiko':'Niedrig';
+  const gapStatus=avgGap<1?'bad':avgGap<=2.5?'ok':'warn';const gapLabel=avgGap<1?'Zu wenig Pause':avgGap<=2.5?'Optimal':'Oft lange Pausen';
+  document.getElementById('regen-summary').innerHTML='<div class="metric-card"><div class="metric-label">Ø Ruhetage</div><div class="metric-value">'+avgGap+'<span class="metric-unit"> Tage</span></div></div><div class="metric-card"><div class="metric-label">Ruhe-Status</div><div class="metric-value" style="font-size:14px;padding-top:4px"><span class="status-pill status-'+gapStatus+'">'+gapLabel+'</span></div></div><div class="metric-card"><div class="metric-label">Zu kurze Pausen</div><div class="metric-value">'+tooShort+'<span class="metric-unit"> mal</span></div></div><div class="metric-card"><div class="metric-label">Ueberlastungsrisiko</div><div class="metric-value" style="font-size:14px;padding-top:4px"><span class="status-pill status-'+riskStatus+'">'+riskLabel+'</span></div></div><div class="metric-card"><div class="metric-label">Fitness (CTL)</div><div class="metric-value">'+currentCtl.toFixed(1)+'<span class="metric-unit"> h</span></div></div><div class="metric-card"><div class="metric-label">Form (CTL-ATL)</div><div class="metric-value" style="color:'+(currentForm>=0?'var(--green)':'var(--red)')+'">'+currentForm.toFixed(1)+'<span class="metric-unit"> h</span></div></div>';
+  const byMonthR={};sorted.forEach(a=>{const m=a.datum.slice(0,7);if(!byMonthR[m])byMonthR[m]=[];byMonthR[m].push(a.datum);});
+  const monthsR=Object.keys(byMonthR).sort().slice(-12);
+  document.getElementById('regen-month-bars').innerHTML=monthsR.map(m=>{const dates=byMonthR[m].sort();if(dates.length<2)return'<div class="month-regen-row"><div class="month-regen-label">'+['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+m.slice(5,7)-1]+' '+m.slice(2,4)+'</div><div style="color:var(--muted);font-size:11px">Wenig Daten</div></div>';const monthGaps=[];for(let i=1;i<dates.length;i++){const d=Math.round((new Date(dates[i])-new Date(dates[i-1]))/(1000*60*60*24));if(d<=10)monthGaps.push(d);}const avgM=(monthGaps.reduce((a,b)=>a+b,0)/monthGaps.length).toFixed(1);const tooS=monthGaps.filter(g=>g===0).length;const opt=monthGaps.filter(g=>g>=1&&g<=2).length;const tooL=monthGaps.filter(g=>g>3).length;const total=monthGaps.length||1;const pS=Math.round(tooS/total*100),pO=Math.round(opt/total*100),pL=Math.round(tooL/total*100);const statusC=avgM<1?'var(--red)':avgM<=2.5?'var(--green)':'var(--amber)';return'<div class="month-regen-row"><div class="month-regen-label">'+['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+m.slice(5,7)-1]+' '+m.slice(2,4)+'</div><div style="flex:1;display:flex;gap:3px">'+(pS>0?'<div class="month-regen-bar" style="flex:'+pS+';background:rgba(239,68,68,0.7)">'+(pS>8?pS+'%':'')+'</div>':'')+(pO>0?'<div class="month-regen-bar" style="flex:'+pO+';background:rgba(16,185,129,0.7)">'+(pO>8?pO+'%':'')+'</div>':'')+(pL>0?'<div class="month-regen-bar" style="flex:'+pL+';background:rgba(245,158,11,0.5)">'+(pL>8?pL+'%':'')+'</div>':'')+'</div><div style="width:100px;font-size:10px;font-family:DM Mono,monospace;color:'+statusC+';text-align:right">Ø '+avgM+' Tage</div></div>';}).join('');
   if(charts.atl)charts.atl.destroy();
   charts.atl=new Chart(document.getElementById('c_atl'),{type:'line',data:{labels:recentDates,datasets:[{label:'CTL',data:recentCtl,borderColor:'#4f7cff',backgroundColor:'rgba(79,124,255,0.05)',tension:0.3,fill:true,pointRadius:0,borderWidth:2},{label:'ATL',data:recentAtl,borderColor:'#f59e0b',backgroundColor:'transparent',tension:0.3,pointRadius:0,borderWidth:2},{label:'Form',data:recentForm,borderColor:'#10b981',backgroundColor:'transparent',tension:0.3,pointRadius:0,borderWidth:1.5,borderDash:[4,2]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:8},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
-
-  // Wochenbelastung
-  const weekMap={};
-  sorted.forEach(a=>{
-    const d=new Date(a.datum);
-    const monday=new Date(d);monday.setDate(d.getDate()-d.getDay()+1);
-    const wk=monday.toISOString().slice(0,10);
-    if(!weekMap[wk])weekMap[wk]=0;
-    weekMap[wk]+=a.dauer_min/60;
-  });
-  const weeks=Object.keys(weekMap).sort().slice(-24);
-  const weekH=weeks.map(w=>Math.round(weekMap[w]*10)/10);
-  const wkLabels=weeks.map(w=>w.slice(5));
-  const avgWeekH=weekH.reduce((a,b)=>a+b,0)/weekH.length;
-  const wkColors=weekH.map(h=>h>avgWeekH*1.4?'rgba(239,68,68,0.7)':h>avgWeekH*1.1?'rgba(245,158,11,0.7)':'rgba(79,124,255,0.7)');
+  const weekMap={};sorted.forEach(a=>{const d=new Date(a.datum);const monday=new Date(d);monday.setDate(d.getDate()-d.getDay()+1);const wk=monday.toISOString().slice(0,10);if(!weekMap[wk])weekMap[wk]=0;weekMap[wk]+=a.dauer_min/60;});
+  const weeks=Object.keys(weekMap).sort().slice(-24);const weekH=weeks.map(w=>Math.round(weekMap[w]*10)/10);const wkLabels=weeks.map(w=>w.slice(5));const avgWeekH=weekH.reduce((a,b)=>a+b,0)/weekH.length;const wkColors=weekH.map(h=>h>avgWeekH*1.4?'rgba(239,68,68,0.7)':h>avgWeekH*1.1?'rgba(245,158,11,0.7)':'rgba(79,124,255,0.7)');
   if(charts.wochen)charts.wochen.destroy();
   charts.wochen=new Chart(document.getElementById('c_wochen'),{type:'bar',data:{labels:wkLabels,datasets:[{label:'h',data:weekH,backgroundColor:wkColors},{label:'Schnitt',data:weekH.map(()=>Math.round(avgWeekH*10)/10),type:'line',borderColor:'rgba(255,255,255,0.2)',backgroundColor:'transparent',pointRadius:0,borderDash:[4,3],borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
 }
@@ -505,11 +547,8 @@ async function loadVO2max(){
     const data=await res.json();
     if(data.vo2max&&data.vo2max.length>0){
       const sorted=data.vo2max.sort((a,b)=>a.datum.localeCompare(b.datum));
-      const labels=sorted.map(d=>d.datum);
-      const values=sorted.map(d=>d.vo2max);
-      const latest=values[values.length-1];
-      const diff=(latest-values[0]).toFixed(1);
-      const trend=diff>0?'+'+diff:diff;
+      const labels=sorted.map(d=>d.datum);const values=sorted.map(d=>d.vo2max);
+      const latest=values[values.length-1];const diff=(latest-values[0]).toFixed(1);const trend=diff>0?'+'+diff:diff;
       document.getElementById('vo2max-sub').textContent='Aktuell: '+latest+' ml/kg/min · Entwicklung: '+trend+' ml/kg/min';
       if(charts.vo2max)charts.vo2max.destroy();
       charts.vo2max=new Chart(document.getElementById('c_vo2max'),{type:'line',data:{labels,datasets:[{label:'VO2max',data:values,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',tension:0.4,fill:true,pointRadius:4,pointBackgroundColor:'#f59e0b',pointBorderColor:'var(--bg)',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false},min:Math.max(0,Math.min(...values)-5),max:Math.max(...values)+5}}}});
@@ -547,11 +586,8 @@ async function startLoad(){
 async function generateAISummary(acts,sport){
   const byYear={};
   acts.forEach(a=>{const y=a.datum.slice(0,4);if(!byYear[y])byYear[y]={km:0,speed:[],w:[],count:0};byYear[y].km+=a.distanz_km;byYear[y].count++;if(a.avg_speed_kmh>0)byYear[y].speed.push(a.avg_speed_kmh);if(a.avg_power_w>0)byYear[y].w.push(a.avg_power_w);});
-  const totalKm=Math.round(acts.reduce((s,a)=>s+a.distanz_km,0));
-  const totalH=Math.round(acts.reduce((s,a)=>s+a.dauer_min,0)/60);
-  const totalKcal=Math.round(acts.reduce((s,a)=>s+a.kalorien,0));
-  const maxAct=[...acts].sort((a,b)=>b.distanz_km-a.distanz_km)[0];
-  const sportName=sport==='cycling'?'Rennrad':'Laufen';
+  const totalKm=Math.round(acts.reduce((s,a)=>s+a.distanz_km,0));const totalH=Math.round(acts.reduce((s,a)=>s+a.dauer_min,0)/60);const totalKcal=Math.round(acts.reduce((s,a)=>s+a.kalorien,0));
+  const maxAct=[...acts].sort((a,b)=>b.distanz_km-a.distanz_km)[0];const sportName=sport==='cycling'?'Rennrad':'Laufen';
   const yearSummary=Object.entries(byYear).sort().map(([y,d])=>{const avgSpeed=d.speed.length?(d.speed.reduce((a,b)=>a+b)/d.speed.length).toFixed(1):'n/a';const avgW=d.w.length?Math.round(d.w.reduce((a,b)=>a+b)/d.w.length):'n/a';return y+': '+d.count+' Einheiten, '+Math.round(d.km)+' km, Avg '+avgSpeed+' km/h, Avg '+avgW+' W';}).join('\n');
   const prompt='Du bist ein persoenlicher Trainingsanalyst. Analysiere diese '+sportName+'-Daten und schreibe eine motivierende, persoenliche Zusammenfassung auf Deutsch. Nutze die echten Zahlen. Maximal 120 Woerter. Verwende Emojis. Struktur: Gesamtbilanz, Jahresentwicklung mit Trend, ein besonderes Highlight.\n\nDaten:\n- Gesamt: '+totalKm.toLocaleString('de')+' km in '+totalH+' Stunden, '+acts.length+' Aktivitaeten, '+totalKcal.toLocaleString('de')+' kcal\n- Laengste Einheit: '+maxAct.distanz_km.toFixed(1)+' km am '+maxAct.datum+'\n- Pro Jahr:\n'+yearSummary;
   try{
@@ -580,8 +616,7 @@ function buildDashboard(acts,sport){
   const byMonth={};
   valid.forEach(a=>{const m=a.datum.slice(0,7);if(!byMonth[m])byMonth[m]={kmIndoor:0,kmOutdoor:0,w:[]};if(isIndoor(a))byMonth[m].kmIndoor+=a.distanz_km;else byMonth[m].kmOutdoor+=a.distanz_km;if(a.avg_power_w>0)byMonth[m].w.push(a.avg_power_w);});
   const months=Object.keys(byMonth).sort().slice(-24);
-  const kmIndoorData=months.map(m=>Math.round(byMonth[m].kmIndoor));
-  const kmOutdoorData=months.map(m=>Math.round(byMonth[m].kmOutdoor));
+  const kmIndoorData=months.map(m=>Math.round(byMonth[m].kmIndoor));const kmOutdoorData=months.map(m=>Math.round(byMonth[m].kmOutdoor));
   const wData=months.map(m=>byMonth[m].w.length?Math.round(byMonth[m].w.reduce((a,b)=>a+b)/byMonth[m].w.length):null);
   const ml=months.map(m=>{const p=m.split('-');return['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+p[1]-1]+' '+p[0].slice(2);});
   if(charts.monat)charts.monat.destroy();
@@ -589,9 +624,7 @@ function buildDashboard(acts,sport){
   const d1=valid.filter(a=>a.dauer_min<45).length,d2=valid.filter(a=>a.dauer_min>=45&&a.dauer_min<=75).length,d3=valid.filter(a=>a.dauer_min>75&&a.dauer_min<=120).length,d4=valid.filter(a=>a.dauer_min>120).length;
   if(charts.dauer)charts.dauer.destroy();
   charts.dauer=new Chart(document.getElementById('c_dauer'),{type:'doughnut',data:{labels:['Unter 45 min','45-75 min','75-120 min','Ueber 120 min'],datasets:[{data:[d1,d2,d3,d4],backgroundColor:['#4f7cff','#10b981','#f59e0b','#f472b6'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'right',labels:{color:'#8892a4',font:{size:11},boxWidth:10,padding:8}}}}});
-  const allMonths=Object.keys(byMonth).sort();
-  const allW=allMonths.map(m=>byMonth[m].w.length?Math.round(byMonth[m].w.reduce((a,b)=>a+b)/byMonth[m].w.length):null);
-  const allMl=allMonths.map(m=>{const p=m.split('-');return['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+p[1]-1]+' '+p[0].slice(2);});
+  const allMonths=Object.keys(byMonth).sort();const allW=allMonths.map(m=>byMonth[m].w.length?Math.round(byMonth[m].w.reduce((a,b)=>a+b)/byMonth[m].w.length):null);const allMl=allMonths.map(m=>{const p=m.split('-');return['Jan','Feb','Mrz','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+p[1]-1]+' '+p[0].slice(2);});
   if(charts.trend)charts.trend.destroy();
   charts.trend=new Chart(document.getElementById('c_trend'),{type:'line',data:{labels:allMl,datasets:[{label:'W',data:allW,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',tension:0.4,fill:true,pointRadius:2,pointBackgroundColor:'#8b5cf6',spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6072',font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false},border:{display:false}},y:{ticks:{color:'#5a6072',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{display:false}}}}});
   const top10=[...valid].sort((a,b)=>b.distanz_km-a.distanz_km).slice(0,10);
